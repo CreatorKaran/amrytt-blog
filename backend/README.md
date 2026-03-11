@@ -107,6 +107,17 @@ backend/
    npm start
    ```
 
+6. **Database Seeding**
+   
+   The database will automatically seed with 6 sample blog posts on first startup if empty.
+   
+   To manually seed the database:
+   ```bash
+   npm run seed
+   ```
+   
+   This will clear existing data and insert fresh sample blogs.
+
 ## API Endpoints
 
 ### Blogs
@@ -143,7 +154,14 @@ curl -X POST http://localhost:5000/api/blogs \
   -H "Content-Type: application/json" \
   -d '{
     "title": "My First Blog",
-    "body": "This is the content of my blog post"
+    "body": "This is the content of my blog post",
+    "excerpt": "A short summary of the blog",
+    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800",
+    "author": {
+      "name": "John Doe",
+      "avatar": "https://i.pravatar.cc/150?img=1"
+    },
+    "category": "Fitness"
   }'
 ```
 
@@ -175,6 +193,12 @@ curl -X POST http://localhost:5000/api/ratings/blog/{blogId} \
 ### Blog
 - `title` (string, required, max 200 chars)
 - `body` (string, required)
+- `excerpt` (string, required, max 500 chars) - Short summary
+- `image` (string, required) - Cover image URL
+- `author` (object, required)
+  - `name` (string, required)
+  - `avatar` (string, optional) - Author avatar URL
+- `category` (string, required) - Blog category (e.g., Fitness, Nutrition, Yoga)
 - `date` (Date, default: now)
 
 ### Comment
@@ -223,6 +247,10 @@ The API uses a centralized error handling middleware that:
 7. **Type Safety**: Full TypeScript implementation ensures type safety and better developer experience.
 
 8. **Swagger Documentation**: Complete API documentation is available at `/api-docs` with interactive testing capabilities.
+
+9. **Auto-Seeding**: On first startup, if the database is empty, it will automatically seed with 6 sample blog posts covering various fitness topics (Full-Body Workouts, Cardio Stamina, Nutrition, Yoga, Core Strength, Running).
+
+10. **Manual Seeding**: Use `npm run seed` to manually clear and reseed the database with sample data at any time.
 
 ## Development
 

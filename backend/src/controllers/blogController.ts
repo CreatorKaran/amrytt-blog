@@ -7,11 +7,15 @@ export const createBlog = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { title, body, date } = req.body;
+    const { title, body, excerpt, image, author, category, date } = req.body;
     
     const blog = await Blog.create({
       title,
       body,
+      excerpt,
+      image,
+      author,
+      category,
       date: date || new Date(),
     });
 

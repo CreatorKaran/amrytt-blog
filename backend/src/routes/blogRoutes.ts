@@ -19,6 +19,10 @@ const router = Router();
  *       required:
  *         - title
  *         - body
+ *         - excerpt
+ *         - image
+ *         - author
+ *         - category
  *       properties:
  *         _id:
  *           type: string
@@ -30,6 +34,25 @@ const router = Router();
  *         body:
  *           type: string
  *           description: Blog content
+ *         excerpt:
+ *           type: string
+ *           maxLength: 500
+ *           description: Short summary of the blog
+ *         image:
+ *           type: string
+ *           description: Blog cover image URL
+ *         author:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: Author name
+ *             avatar:
+ *               type: string
+ *               description: Author avatar URL
+ *         category:
+ *           type: string
+ *           description: Blog category
  *         date:
  *           type: string
  *           format: date-time
@@ -42,8 +65,14 @@ const router = Router();
  *           format: date-time
  *       example:
  *         _id: 507f1f77bcf86cd799439011
- *         title: My First Blog Post
- *         body: This is the content of my first blog post
+ *         title: The Ultimate Guide to Full-Body Workouts
+ *         body: Full-body workouts are an excellent way to maximize your time...
+ *         excerpt: Discover the most effective full-body workout routines...
+ *         image: https://images.unsplash.com/photo-1534438327276-14e5300c3a48
+ *         author:
+ *           name: Alex Cooper
+ *           avatar: https://i.pravatar.cc/150?img=12
+ *         category: Fitness
  *         date: 2024-01-15T10:30:00.000Z
  */
 
@@ -62,10 +91,27 @@ const router = Router();
  *             required:
  *               - title
  *               - body
+ *               - excerpt
+ *               - image
+ *               - author
+ *               - category
  *             properties:
  *               title:
  *                 type: string
  *               body:
+ *                 type: string
+ *               excerpt:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *               author:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   avatar:
+ *                     type: string
+ *               category:
  *                 type: string
  *               date:
  *                 type: string
@@ -146,6 +192,19 @@ router.get('/:id', idValidation, getBlogById);
  *               title:
  *                 type: string
  *               body:
+ *                 type: string
+ *               excerpt:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *               author:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   avatar:
+ *                     type: string
+ *               category:
  *                 type: string
  *               date:
  *                 type: string

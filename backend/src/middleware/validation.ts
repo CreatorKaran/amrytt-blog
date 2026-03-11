@@ -20,6 +20,11 @@ export const handleValidationErrors = (
 export const blogValidation = [
   body('title').trim().notEmpty().withMessage('Title is required').isLength({ max: 200 }).withMessage('Title cannot exceed 200 characters'),
   body('body').trim().notEmpty().withMessage('Body is required'),
+  body('excerpt').trim().notEmpty().withMessage('Excerpt is required').isLength({ max: 500 }).withMessage('Excerpt cannot exceed 500 characters'),
+  body('image').trim().notEmpty().withMessage('Image URL is required'),
+  body('author.name').trim().notEmpty().withMessage('Author name is required'),
+  body('author.avatar').optional().trim(),
+  body('category').trim().notEmpty().withMessage('Category is required'),
   body('date').optional().isISO8601().withMessage('Invalid date format'),
   handleValidationErrors,
 ];
