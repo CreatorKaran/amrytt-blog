@@ -2,7 +2,7 @@
 
 ## Overview
 
-A production-ready blog post page built with Next.js, featuring static generation, client-side rendering for comments, and pixel-perfect CSS implementation based on Figma designs.
+A production-ready blog post page built with Next.js, featuring static generation, client-side rendering for comments, and Tailwind CSS styling based on Figma designs.
 
 ## Features Implemented
 
@@ -24,14 +24,13 @@ A production-ready blog post page built with Next.js, featuring static generatio
    - Only loads when "Edit" button is clicked
    - Reduces initial bundle size
 
-4. **CSS Excellence**
-   - Pure CSS (no external frameworks)
-   - Flexbox and Grid layouts
-   - BEM naming convention
-   - Responsive design with media queries
-   - CSS custom properties for theming
-   - Smooth transitions and hover states
-   - Performance-optimized (minimal reflows/repaints)
+4. **Tailwind CSS Styling**
+   - Utility-first CSS approach
+   - Responsive design with Tailwind breakpoints
+   - Custom animations and transitions
+   - Consistent spacing and typography
+   - Hover and focus states
+   - Performance-optimized
 
 ### ✅ Bonus Features
 
@@ -41,7 +40,7 @@ A production-ready blog post page built with Next.js, featuring static generatio
 - **Star Rating System**: Visual rating component with multiple sizes
 - **Related Articles**: Contextual content recommendations
 - **Sidebar**: Sticky sidebar with top guides
-- **Accessibility**: Semantic HTML, focus states, ARIA attributes
+- **Accessibility**: Semantic HTML, focus states, proper contrast
 
 ## Project Structure
 
@@ -66,60 +65,103 @@ frontend/src/
 ├── types/
 │   └── blog.ts                 # TypeScript interfaces
 └── styles/
-    └── globals.css             # Complete CSS implementation
+    └── globals.css             # Tailwind imports + custom animations
 ```
 
-## CSS Architecture
+## Tailwind CSS Implementation
 
-### Design System
+### Utility-First Approach
 
-- **Colors**: Semantic color variables for consistency
-- **Typography**: System font stack with fallbacks
-- **Spacing**: 8px base unit with consistent scale
-- **Border Radius**: Predefined sizes (sm, md, lg, full)
-- **Shadows**: Three-tier shadow system
-- **Transitions**: Standardized timing functions
+All components use Tailwind utility classes for styling:
 
-### BEM Methodology
-
-```css
-.block {}
-.block__element {}
-.block__element--modifier {}
+```tsx
+// Example: Comment Card
+<article className="bg-white border border-gray-200 rounded-xl p-6 
+                    transition-shadow hover:shadow-md">
+  {/* Content */}
+</article>
 ```
+
+### Responsive Design
+
+Tailwind breakpoints used throughout:
+- `sm:` - 640px
+- `md:` - 768px
+- `lg:` - 1024px
+- `xl:` - 1280px
 
 Example:
-```css
-.comment-card {}
-.comment-card__header {}
-.comment-card__author {}
-.comment-card__text {}
+```tsx
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 ```
 
-### Responsive Breakpoints
+### Custom Animations
 
-- Desktop: 1024px+
-- Tablet: 768px - 1023px
-- Mobile: < 768px
-- Small Mobile: < 480px
+Defined in `globals.css`:
+```css
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+```
+
+### Color Palette
+
+- Primary: `blue-600` (#2563eb)
+- Text: `gray-900`, `gray-600`, `gray-400`
+- Borders: `gray-200`
+- Backgrounds: `white`, `gray-50`
+- Accent: `yellow-400` (stars)
+
+## Component Styling Examples
+
+### Layout Component
+```tsx
+<div className="min-h-screen flex flex-col">
+  <header className="bg-white border-b border-gray-200 py-6 sticky top-0 z-50">
+    {/* Header content */}
+  </header>
+</div>
+```
+
+### Blog Post Page
+```tsx
+<article className="bg-white">
+  <div className="max-w-7xl mx-auto px-6">
+    <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+      {title}
+    </h1>
+  </div>
+</article>
+```
+
+### Comment Card
+```tsx
+<article className="bg-white border border-gray-200 rounded-xl p-6 
+                    transition-shadow hover:shadow-md">
+  <div className="flex items-start gap-4 mb-4">
+    <div className="w-10 h-10 rounded-full bg-gradient-to-br 
+                    from-blue-600 to-blue-400 text-white">
+      {/* Avatar */}
+    </div>
+  </div>
+</article>
+```
 
 ## Performance Optimizations
 
 1. **Code Splitting**: Dynamic imports for editor component
 2. **Image Optimization**: Proper aspect ratios and object-fit
-3. **CSS Performance**: 
-   - Transform over position changes
-   - Will-change for animations
-   - Minimal repaints
+3. **Tailwind Purging**: Unused CSS automatically removed in production
 4. **Loading States**: Skeleton screens prevent layout shift
 5. **Sticky Positioning**: Efficient sidebar behavior
 
 ## Accessibility Features
 
 - Semantic HTML5 elements
-- ARIA labels where needed
+- Proper heading hierarchy
 - Keyboard navigation support
-- Focus indicators
+- Focus indicators (`focus:outline-none focus:ring-4`)
 - Color contrast compliance
 - Screen reader friendly
 
@@ -155,11 +197,27 @@ Set environment variable:
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
 
+## Tailwind Configuration
+
+The project uses Tailwind CSS 4.x with PostCSS. Configuration is minimal as Tailwind 4 uses CSS-based configuration.
+
+### Key Tailwind Features Used
+
+- **Flexbox & Grid**: Layout utilities
+- **Spacing**: Consistent padding and margins
+- **Typography**: Font sizes, weights, line heights
+- **Colors**: Semantic color palette
+- **Borders**: Rounded corners and borders
+- **Shadows**: Elevation system
+- **Transitions**: Smooth animations
+- **Responsive**: Mobile-first breakpoints
+- **Hover/Focus**: Interactive states
+
 ## Design Fidelity
 
 The implementation matches the Figma designs with:
-- Exact spacing and typography
-- Proper color scheme
+- Exact spacing using Tailwind's spacing scale
+- Proper typography hierarchy
 - Responsive layouts for all breakpoints
 - Smooth interactions and transitions
 - Professional polish

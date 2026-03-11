@@ -11,7 +11,7 @@ import { mockBlogs, mockComments } from '@/lib/mockData';
 
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
   ssr: false,
-  loading: () => <div className="editor-loading">Loading editor...</div>,
+  loading: () => <div className="p-8 text-center text-gray-600 italic">Loading editor...</div>,
 });
 
 interface BlogPostProps {
@@ -64,22 +64,22 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
   const renderContent = () => {
     return editedContent.split('\n\n').map((paragraph, index) => {
       if (paragraph.startsWith('## ')) {
-        return <h2 key={index} className="blog-content__heading">{paragraph.replace('## ', '')}</h2>;
+        return <h2 key={index} className="text-3xl font-bold mt-8 mb-6 leading-tight text-gray-900">{paragraph.replace('## ', '')}</h2>;
       }
       if (paragraph.startsWith('### ')) {
-        return <h3 key={index} className="blog-content__subheading">{paragraph.replace('### ', '')}</h3>;
+        return <h3 key={index} className="text-2xl font-semibold mt-6 mb-4 leading-snug text-gray-900">{paragraph.replace('### ', '')}</h3>;
       }
       if (paragraph.startsWith('- ')) {
         const items = paragraph.split('\n').filter(line => line.startsWith('- '));
         return (
-          <ul key={index} className="blog-content__list">
+          <ul key={index} className="my-6 pl-8 text-gray-600 space-y-2">
             {items.map((item, i) => (
-              <li key={i}>{item.replace('- ', '')}</li>
+              <li key={i} className="pl-2">{item.replace('- ', '')}</li>
             ))}
           </ul>
         );
       }
-      return <p key={index} className="blog-content__paragraph">{paragraph}</p>;
+      return <p key={index} className="mb-6 text-gray-600">{paragraph}</p>;
     });
   };
 
@@ -89,45 +89,50 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
 
   return (
     <Layout>
-      <article className="blog-post">
-        <div className="blog-post__container">
-          <header className="blog-post__header">
-            <p className="blog-post__breadcrumb">HOME / ARTICLES</p>
-            <h1 className="blog-post__title">{blog.title}</h1>
+      <article className="bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <header className="py-12 text-center">
+            <p className="text-xs font-semibold tracking-widest text-gray-400 mb-4 uppercase">
+              HOME / ARTICLES
+            </p>
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight text-gray-900 max-w-4xl mx-auto">
+              {blog.title}
+            </h1>
           </header>
 
-          <div className="blog-post__hero">
+          <div className="mb-12 rounded-xl overflow-hidden shadow-md">
             <img 
               src={blog.image} 
               alt={blog.title}
-              className="blog-post__hero-image"
+              className="w-full h-auto aspect-video object-cover"
             />
           </div>
 
-          <div className="blog-post__layout">
-            <div className="blog-post__main">
-              <div className="blog-post__meta">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12 mb-12">
+            <div className="min-w-0">
+              <div className="flex items-center gap-4 pb-8 border-b border-gray-200 mb-8">
                 <img 
                   src={blog.author.avatar} 
                   alt={blog.author.name}
-                  className="blog-post__author-avatar"
+                  className="w-12 h-12 rounded-full object-cover"
                 />
-                <div className="blog-post__author-info">
-                  <span className="blog-post__author-name">{blog.author.name}</span>
-                  <div className="blog-post__meta-details">
-                    <time className="blog-post__date">{formatDate(blog.date)}</time>
-                    <span className="blog-post__category">{blog.category}</span>
+                <div className="flex flex-col gap-1">
+                  <span className="font-semibold text-base text-gray-900">{blog.author.name}</span>
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <time>{formatDate(blog.date)}</time>
+                    <span>•</span>
+                    <span className="text-blue-600 font-medium">{blog.category}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="blog-content">
+              <div className="text-lg leading-relaxed text-gray-900">
                 {renderContent()}
               </div>
 
-              <div className="blog-post__actions">
+              <div className="my-8 py-8 border-t border-b border-gray-200">
                 <button 
-                  className="blog-post__edit-button"
+                  className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold text-sm transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
                   onClick={() => setIsEditing(!isEditing)}
                 >
                   {isEditing ? 'Cancel Edit' : 'Edit'}
@@ -142,15 +147,15 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
                 />
               )}
 
-              <section className="blog-post__comments">
-                <div className="comments-header">
-                  <h2 className="comments-header__title">
+              <section className="mt-12">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b-2 border-gray-200 gap-4">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     {comments.length} Comment{comments.length !== 1 ? 's' : ''}
                   </h2>
                   {comments.length > 0 && (
-                    <div className="comments-header__rating">
+                    <div className="flex items-center gap-2">
                       <StarRating rating={Math.round(averageRating)} size="medium" />
-                      <span className="comments-header__rating-text">
+                      <span className="text-lg font-semibold text-gray-900">
                         {averageRating.toFixed(1)}
                       </span>
                     </div>
@@ -158,24 +163,26 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
                 </div>
 
                 {isLoadingComments && (
-                  <div className="comments-loading">
+                  <div className="flex flex-col gap-6">
                     <CommentSkeleton />
                     <CommentSkeleton />
                   </div>
                 )}
 
                 {commentsError && (
-                  <div className="comments-error">
+                  <div className="p-8 bg-red-50 border border-red-200 rounded-lg text-red-600 text-center">
                     <p>{commentsError}</p>
                   </div>
                 )}
 
                 {!isLoadingComments && !commentsError && comments.length === 0 && (
-                  <p className="comments-empty">No comments yet. Be the first to comment!</p>
+                  <p className="py-12 text-center text-gray-400 italic">
+                    No comments yet. Be the first to comment!
+                  </p>
                 )}
 
                 {!isLoadingComments && !commentsError && comments.length > 0 && (
-                  <div className="comments-list">
+                  <div className="flex flex-col gap-6">
                     {comments.map((comment) => (
                       <CommentCard key={comment.id} comment={comment} />
                     ))}
@@ -184,24 +191,28 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
               </section>
             </div>
 
-            <aside className="blog-post__sidebar">
-              <div className="sidebar-card">
-                <h3 className="sidebar-card__title">Top Guides</h3>
+            <aside className="lg:sticky lg:top-24 h-fit">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-8">
+                <h3 className="text-lg font-bold mb-6 text-gray-900">Top Guides</h3>
                 {relatedArticles.slice(0, 3).map((article) => (
                   <a 
                     key={article.id}
                     href={`/blog/${article.slug}`}
-                    className="sidebar-article"
+                    className="flex gap-4 py-4 border-b border-gray-200 last:border-b-0 transition-transform hover:translate-x-1"
                   >
                     <img 
                       src={article.image} 
                       alt={article.title}
-                      className="sidebar-article__image"
+                      className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                     />
-                    <div className="sidebar-article__content">
-                      <span className="sidebar-article__category">{article.category}</span>
-                      <h4 className="sidebar-article__title">{article.title}</h4>
-                      <time className="sidebar-article__date">
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                        {article.category}
+                      </span>
+                      <h4 className="text-sm font-semibold leading-snug text-gray-900 line-clamp-2">
+                        {article.title}
+                      </h4>
+                      <time className="text-xs text-gray-400">
                         {new Date(article.date).toLocaleDateString('en-US', { 
                           day: 'numeric',
                           month: 'long',
@@ -217,7 +228,7 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
         </div>
       </article>
 
-      <div className="blog-post__container">
+      <div className="max-w-7xl mx-auto px-6">
         <RelatedArticles articles={relatedArticles.slice(0, 4)} />
       </div>
     </Layout>

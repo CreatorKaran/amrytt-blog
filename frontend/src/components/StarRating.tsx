@@ -8,12 +8,20 @@ interface StarRatingProps {
 export default function StarRating({ rating, size = 'medium' }: StarRatingProps) {
   const stars = Array.from({ length: 5 }, (_, i) => i + 1);
   
+  const sizeClasses = {
+    small: 'text-sm',
+    medium: 'text-lg',
+    large: 'text-2xl'
+  };
+  
   return (
-    <div className={`star-rating star-rating--${size}`}>
+    <div className={`flex gap-0.5 ${sizeClasses[size]}`}>
       {stars.map((star) => (
         <span
           key={star}
-          className={`star-rating__star ${star <= rating ? 'star-rating__star--filled' : ''}`}
+          className={`transition-colors ${
+            star <= rating ? 'text-yellow-400' : 'text-gray-300'
+          }`}
         >
           ★
         </span>
