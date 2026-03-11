@@ -4,7 +4,7 @@ import {
   getRatingsByBlogId,
   deleteRating,
 } from '../controllers/ratingController';
-import { ratingValidation, idValidation } from '../middleware/validation';
+import { validate, blogIdWithRatingSchema, blogIdSchema, idSchema } from '../middleware/validation';
 
 const router = Router();
 
@@ -91,7 +91,7 @@ const router = Router();
  *       404:
  *         description: Blog not found
  */
-router.post('/blog/:blogId', idValidation, ratingValidation, createRating);
+router.post('/blog/:blogId', validate(blogIdWithRatingSchema), createRating);
 
 /**
  * @swagger
@@ -124,7 +124,7 @@ router.post('/blog/:blogId', idValidation, ratingValidation, createRating);
  *                   items:
  *                     $ref: '#/components/schemas/Rating'
  */
-router.get('/blog/:blogId', idValidation, getRatingsByBlogId);
+router.get('/blog/:blogId', validate(blogIdSchema), getRatingsByBlogId);
 
 /**
  * @swagger
@@ -144,6 +144,6 @@ router.get('/blog/:blogId', idValidation, getRatingsByBlogId);
  *       404:
  *         description: Rating not found
  */
-router.delete('/:id', idValidation, deleteRating);
+router.delete('/:id', validate(idSchema), deleteRating);
 
 export default router;

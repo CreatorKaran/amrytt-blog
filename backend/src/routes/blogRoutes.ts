@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import Joi from 'joi';
 import {
   createBlog,
   getAllBlogs,
@@ -6,7 +7,7 @@ import {
   updateBlog,
   deleteBlog,
 } from '../controllers/blogController';
-import { blogValidation, idValidation } from '../middleware/validation';
+import { validate, blogSchema, idSchema } from '../middleware/validation';
 
 const router = Router();
 
@@ -122,7 +123,7 @@ const router = Router();
  *       400:
  *         description: Validation error
  */
-router.post('/', blogValidation, createBlog);
+router.post('/', validate(blogSchema), createBlog);
 
 /**
  * @swagger
@@ -168,7 +169,7 @@ router.get('/', getAllBlogs);
  *       404:
  *         description: Blog not found
  */
-router.get('/:id', idValidation, getBlogById);
+router.get('/:id', validate(idSchema), getBlogById);
 
 /**
  * @swagger
@@ -215,7 +216,11 @@ router.get('/:id', idValidation, getBlogById);
  *       404:
  *         description: Blog not found
  */
-router.put('/:id', idValidation, blogValidation, updateBlog);
+router.put('/:id', validate(blogSchema.keys({
+  params: Joi.object({
+    id: Joi.string().hex().length(24).required()
+  }).required()
+})), updateBlog);
 
 /**
  * @swagger
@@ -235,6 +240,6 @@ router.put('/:id', idValidation, blogValidation, updateBlog);
  *       404:
  *         description: Blog not found
  */
-router.delete('/:id', idValidation, deleteBlog);
+router.delete('/:id', validate(idSchema), deleteBlog);
 
 export default router;

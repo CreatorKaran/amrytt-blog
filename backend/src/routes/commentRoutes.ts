@@ -4,7 +4,7 @@ import {
   getCommentsByBlogId,
   deleteComment,
 } from '../controllers/commentController';
-import { commentValidation, idValidation } from '../middleware/validation';
+import { validate, blogIdWithCommentSchema, blogIdSchema, idSchema } from '../middleware/validation';
 
 const router = Router();
 
@@ -80,7 +80,7 @@ const router = Router();
  *       404:
  *         description: Blog not found
  */
-router.post('/blog/:blogId', idValidation, commentValidation, createComment);
+router.post('/blog/:blogId', validate(blogIdWithCommentSchema), createComment);
 
 /**
  * @swagger
@@ -111,7 +111,7 @@ router.post('/blog/:blogId', idValidation, commentValidation, createComment);
  *                   items:
  *                     $ref: '#/components/schemas/Comment'
  */
-router.get('/blog/:blogId', idValidation, getCommentsByBlogId);
+router.get('/blog/:blogId', validate(blogIdSchema), getCommentsByBlogId);
 
 /**
  * @swagger
@@ -131,6 +131,6 @@ router.get('/blog/:blogId', idValidation, getCommentsByBlogId);
  *       404:
  *         description: Comment not found
  */
-router.delete('/:id', idValidation, deleteComment);
+router.delete('/:id', validate(idSchema), deleteComment);
 
 export default router;

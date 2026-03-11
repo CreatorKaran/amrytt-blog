@@ -8,7 +8,7 @@ A comprehensive RESTful API for managing blog posts, comments, and ratings built
 - **Comments System**: Add and retrieve comments for blog posts
 - **Rating & Review System**: Submit star ratings (1-5) and reviews for posts
 - **Swagger Documentation**: Interactive API documentation at `/api-docs`
-- **Input Validation**: Request validation using express-validator
+- **Input Validation**: Request validation using Joi
 - **Error Handling**: Centralized error handling middleware
 - **TypeScript**: Full type safety throughout the application
 - **Modular Architecture**: Clean separation of concerns (models, controllers, routes)
@@ -19,7 +19,7 @@ A comprehensive RESTful API for managing blog posts, comments, and ratings built
 - **Framework**: Express.js
 - **Language**: TypeScript
 - **Database**: MongoDB with Mongoose ODM
-- **Validation**: express-validator
+- **Validation**: Joi
 - **Documentation**: Swagger (OpenAPI 3.0)
 - **Dev Tools**: nodemon, ts-node
 
