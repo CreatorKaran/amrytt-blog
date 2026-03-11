@@ -8,7 +8,7 @@ export const createBlog = async (
 ): Promise<void> => {
   try {
     const { title, body, excerpt, image, author, category, date } = req.body;
-    
+
     const blog = await Blog.create({
       title,
       body,
