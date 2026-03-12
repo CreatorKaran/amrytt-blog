@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { GetStaticProps, GetStaticPaths } from 'next';
+import Head from 'next/head';
 import moment from 'moment';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Blog, Comment, Rating } from '@/types/blog';
-import { 
-  getAllBlogs, 
-  getCommentsByBlogId, 
-  getRatingsByBlogId, 
+import {
+  getAllBlogs,
+  getCommentsByBlogId,
+  getRatingsByBlogId,
   getRelatedArticles,
   getExploreMore,
   getTopGuides,
-  generateSlug 
+  generateSlug
 } from '@/lib/api';
 import Link from 'next/link';
 import RelatedArticles from '@/components/RelatedArticles';
@@ -31,15 +32,14 @@ interface CombinedComment extends Comment {
 // Star Rating Component for Comments
 function CommentStarRating({ rating }: { rating: number }) {
   const stars = Array.from({ length: 5 }, (_, i) => i + 1);
-  
+
   return (
     <div className="flex gap-1 items-center">
       {stars.map((star) => (
         <svg
           key={star}
-          className={`w-[18px] h-[18px] ${
-            star <= rating ? 'text-yellow-400' : 'text-gray-300'
-          }`}
+          className={`w-[18px] h-[18px] ${star <= rating ? 'text-yellow-400' : 'text-gray-300'
+            }`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -72,7 +72,7 @@ function InteractiveStarRating({ rating, onRatingChange }: { rating: number; onR
       {[1, 2, 3, 4, 5].map((star) => (
         <div key={star} className="relative">
           {star === rating ? (
-            <div 
+            <div
               className="flex items-center gap-2 px-4 py-2 rounded-xl"
               style={{ backgroundColor: getRatingColor(star) }}
             >
@@ -116,18 +116,28 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
     rating: 5
   });
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://amrytt-blog.com";
+  const blogUrl = `${siteUrl}/blog/${generateSlug(blog.title)}`;
+  const pageTitle = `${blog.title} | Amrytt Fitness Blog`;
+  const pageDescription = blog.excerpt || `Read ${blog.title} - Expert fitness advice and tips from ${blog.author.name}`;
+
+  // Calculate average rating for structured data
+  const averageRating = ratings.length > 0 
+    ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length 
+    : 0;
+
   useEffect(() => {
     const fetchCommentsAndRatings = async () => {
       try {
         setIsLoadingComments(true);
         setCommentsError(null);
-        
+
         // Fetch both comments and ratings in parallel
         const [commentsData, ratingsData] = await Promise.all([
           getCommentsByBlogId(blog._id),
           getRatingsByBlogId(blog._id)
         ]);
-        
+
         setComments(commentsData);
         setRatings(ratingsData.data);
       } catch (error) {
@@ -156,7 +166,142 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
-    <div className="bg-[#fafafa] min-h-screen">
+    <>
+      <Head>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={`${blog.category}, fitness, workout, ${blog.author.name}, health, wellness`} />
+        <meta name="author" content={blog.author.name} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={blogUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={blog.image} />
+        <meta property="og:site_name" content="Amrytt Fitness Blog" />
+        <meta property="article:published_time" content={blog.date} />
+        <meta property="article:author" content={blog.author.name} />
+        <meta property="article:section" content={blog.category} />
+        
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={blogUrl} />
+        <meta property="twitter:title" content={pageTitle} />
+        <meta property="twitter:description" content={pageDescription} />
+        <meta property="twitter:image" content={blog.image} />
+        <meta property="twitter:creator" content={`@${blog.author.name.replace(/\s+/g, '').toLowerCase()}`} />
+        
+        {/* Additional SEO */}
+        <meta name="robots" content="index, follow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="canonical" href={blogUrl} />
+        
+        {/* Structured Data - Article */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              "headline": blog.title,
+              "description": pageDescription,
+              "image": blog.image,
+              "url": blogUrl,
+              "datePublished": blog.date,
+              "dateModified": blog.updatedAt || blog.date,
+              "author": {
+                "@type": "Person",
+                "name": blog.author.name,
+                "image": blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "Amrytt Fitness",
+                "url": siteUrl,
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": `${siteUrl}/images/logo.png`
+                }
+              },
+              "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": blogUrl
+              },
+              "articleSection": blog.category,
+              "wordCount": blog.body ? blog.body.split(' ').length : 0,
+              ...(averageRating > 0 && {
+                "aggregateRating": {
+                  "@type": "AggregateRating",
+                  "ratingValue": averageRating.toFixed(1),
+                  "reviewCount": ratings.length,
+                  "bestRating": "5",
+                  "worstRating": "1"
+                }
+              })
+            })
+          }}
+        />
+        
+        {/* Structured Data - Breadcrumbs */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": siteUrl
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Articles",
+                  "item": `${siteUrl}/articles`
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 3,
+                  "name": blog.title,
+                  "item": blogUrl
+                }
+              ]
+            })
+          }}
+        />
+        
+        {/* Structured Data - FAQ if comments exist */}
+        {combinedComments.length > 0 && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": combinedComments.slice(0, 5).map(comment => ({
+                  "@type": "Question",
+                  "name": `Comment by ${comment.author}`,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": comment.comment,
+                    "author": {
+                      "@type": "Person",
+                      "name": comment.author
+                    },
+                    "dateCreated": comment.date
+                  }
+                }))
+              })
+            }}
+          />
+        )}
+      </Head>
+      
+      <div className="bg-[#fafafa] min-h-screen">
       {/* Page Header */}
       <div className="flex flex-col items-center justify-center py-8 md:py-16 w-full">
         <div className="flex flex-col items-center gap-1 text-center max-w-4xl px-6">
@@ -167,7 +312,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
             <span className="font-normal">Articles</span>
             <span className="font-normal">/</span>
           </div>
-          
+
           {/* Title */}
           <h1 className="text-[#10152e] text-2xl md:text-4xl lg:text-[48px] font-semibold leading-tight md:leading-[66px] tracking-[1px] text-center">
             {blog.title}
@@ -177,8 +322,8 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
 
       {/* Hero Image */}
       <div className="relative h-[300px] md:h-[400px] lg:h-[560px] w-full overflow-hidden">
-        <img 
-          src={blog.image} 
+        <img
+          src={blog.image}
           alt={blog.title}
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -192,8 +337,8 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
             {/* Article Meta */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between py-6 border-b border-[#e5e6ea] gap-4">
               <div className="flex items-center gap-3">
-                <img 
-                  src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`} 
+                <img
+                  src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`}
                   alt={blog.author.name}
                   className="w-8 h-8 rounded-full object-cover"
                 />
@@ -216,7 +361,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
             <div className="text-[#10152e] text-base leading-6 tracking-[1px] space-y-6">
               <MarkdownRenderer content={blog.body} />
             </div>
-            
+
             {/* Author Section */}
             <div className="flex flex-col gap-8">
               <div className="border-t border-[#e5e6ea] pt-6 h-[296px] px-6">
@@ -225,8 +370,8 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
                   <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">{blog.author.name}</span>
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                  <img 
-                    src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`} 
+                  <img
+                    src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`}
                     alt={blog.author.name}
                     className="w-[100px] h-[100px] rounded-full object-cover"
                   />
@@ -265,39 +410,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
           <div className="w-full lg:w-[341px] px-5 py-6 order-first lg:order-last">
             <div className="flex flex-col gap-10 lg:gap-[100px]">
               {/* Explore More */}
-              {/* <div className="flex flex-col gap-6 lg:gap-10 w-full">
-                <h3 className="text-[#10152e] text-xl font-semibold leading-7 tracking-[1px]">
-                  Explore more
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 lg:gap-10 w-full">
-                  {exploreMore?.slice(0, 3).map((article, index) => (
-                    <div key={article._id} className="flex flex-col gap-4 lg:gap-6 w-full">
-                      <div className="flex flex-col gap-4 lg:gap-6 w-full">
-                        <img 
-                          src={article.image} 
-                          alt={article.title}
-                          className="w-full h-[165px] object-cover"
-                        />
-                        <div className="flex flex-col gap-3 lg:gap-4 w-full">
-                          <div className="flex items-center gap-2">
-                            <span className="text-black text-sm font-medium tracking-[1px]">
-                              {article.category}
-                            </span>
-                            <div className="w-0 h-4 border-l border-gray-300 rotate-90"></div>
-                            <span className="text-[#757575] text-sm tracking-[1px] whitespace-nowrap">
-                              {moment(article.date).format('DD MMM YYYY')}
-                            </span>
-                          </div>
-                          <p className="text-[#121212] text-base leading-6 tracking-[1px] w-full">
-                            {article.title}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div> */}
-              <ExploreMore articles={exploreMore}/>
+              <ExploreMore articles={exploreMore} />
               {/* Tour Guides */}
               <div className="flex flex-col gap-6 lg:gap-10 w-full">
                 <h3 className="text-[#10152e] text-xl font-semibold leading-7 tracking-[1px]">
@@ -308,8 +421,8 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
                     <div key={guide._id} className="flex flex-col gap-4 lg:gap-6 w-full">
                       <div className="flex flex-col gap-3 lg:gap-4 w-full">
                         <div className="flex items-start gap-4 w-full">
-                          <img 
-                            src={guide.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide.author.name)}&background=2563eb&color=fff`} 
+                          <img
+                            src={guide.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide.author.name)}&background=2563eb&color=fff`}
                             alt={guide.author.name}
                             className="w-[60px] h-[60px] rounded-full object-cover flex-shrink-0"
                           />
@@ -360,8 +473,8 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
               {combinedComments.slice(0, 2).map((comment, index) => (
                 <div key={comment._id} className="w-full">
                   <div className="flex gap-5 items-start w-full">
-                    <img 
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author)}&background=2563eb&color=fff`} 
+                    <img
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author)}&background=2563eb&color=fff`}
                       alt={comment.author}
                       className="w-[60px] h-[60px] rounded-full object-cover flex-shrink-0"
                     />
@@ -450,7 +563,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
                   <input
                     type="text"
                     value={newComment.name}
-                    onChange={(e) => setNewComment({...newComment, name: e.target.value})}
+                    onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
                     className="w-full h-12 bg-[#f5f5f5] rounded-xl px-4 mt-2 text-black border-0 outline-none"
                   />
                 </div>
@@ -463,7 +576,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
                   <input
                     type="email"
                     value={newComment.email}
-                    onChange={(e) => setNewComment({...newComment, email: e.target.value})}
+                    onChange={(e) => setNewComment({ ...newComment, email: e.target.value })}
                     className="w-full h-12 bg-[#f5f5f5] rounded-xl px-4 mt-2 text-black border-0 outline-none"
                   />
                 </div>
@@ -476,7 +589,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
                 </label>
                 <textarea
                   value={newComment.comment}
-                  onChange={(e) => setNewComment({...newComment, comment: e.target.value})}
+                  onChange={(e) => setNewComment({ ...newComment, comment: e.target.value })}
                   placeholder="Search anything..."
                   className="flex-1 min-h-[120px] lg:min-h-0 bg-[#f5f5f5] rounded-[10px] px-6 py-6 text-black placeholder-gray-400 resize-none border-0 outline-none"
                 />
@@ -489,9 +602,9 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
                   Rate the usefulness of the article
                 </span>
                 <div className="overflow-x-auto">
-                  <InteractiveStarRating 
-                    rating={newComment.rating} 
-                    onRatingChange={(rating) => setNewComment({...newComment, rating})} 
+                  <InteractiveStarRating
+                    rating={newComment.rating}
+                    onRatingChange={(rating) => setNewComment({ ...newComment, rating })}
                   />
                 </div>
               </div>
@@ -512,6 +625,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
 
       <RelatedArticles articles={relatedArticles} />
     </div>
+    </>
   );
 }
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -537,7 +651,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   try {
     const slug = params?.slug as string;
-    
+
     // Fetch all blogs to find the one matching the slug
     const blogs = await getAllBlogs();
     const blog = blogs.find((b) => generateSlug(b.title) === slug);
