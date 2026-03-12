@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { GetStaticProps, GetStaticPaths } from 'next';
-import Head from 'next/head';
 import moment from 'moment';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Blog, Comment, Rating } from '@/types/blog';
@@ -13,6 +12,7 @@ import {
   getTopGuides,
   generateSlug
 } from '@/lib/api';
+import { generateBlogMetadata } from '@/lib/metadata';
 import Link from 'next/link';
 import RelatedArticles from '@/components/RelatedArticles';
 import ExploreMore from '@/components/ExploreMore';
@@ -116,16 +116,6 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
     rating: 5
   });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://amrytt-blog.com";
-  const blogUrl = `${siteUrl}/blog/${generateSlug(blog.title)}`;
-  const pageTitle = `${blog.title} | Amrytt Fitness Blog`;
-  const pageDescription = blog.excerpt || `Read ${blog.title} - Expert fitness advice and tips from ${blog.author.name}`;
-
-  // Calculate average rating for structured data
-  const averageRating = ratings.length > 0 
-    ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length 
-    : 0;
-
   useEffect(() => {
     const fetchCommentsAndRatings = async () => {
       try {
@@ -167,139 +157,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta name="keywords" content={`${blog.category}, fitness, workout, ${blog.author.name}, health, wellness`} />
-        <meta name="author" content={blog.author.name} />
-        
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={blogUrl} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:image" content={blog.image} />
-        <meta property="og:site_name" content="Amrytt Fitness Blog" />
-        <meta property="article:published_time" content={blog.date} />
-        <meta property="article:author" content={blog.author.name} />
-        <meta property="article:section" content={blog.category} />
-        
-        {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={blogUrl} />
-        <meta property="twitter:title" content={pageTitle} />
-        <meta property="twitter:description" content={pageDescription} />
-        <meta property="twitter:image" content={blog.image} />
-        <meta property="twitter:creator" content={`@${blog.author.name.replace(/\s+/g, '').toLowerCase()}`} />
-        
-        {/* Additional SEO */}
-        <meta name="robots" content="index, follow" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="canonical" href={blogUrl} />
-        
-        {/* Structured Data - Article */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BlogPosting",
-              "headline": blog.title,
-              "description": pageDescription,
-              "image": blog.image,
-              "url": blogUrl,
-              "datePublished": blog.date,
-              "dateModified": blog.updatedAt || blog.date,
-              "author": {
-                "@type": "Person",
-                "name": blog.author.name,
-                "image": blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`
-              },
-              "publisher": {
-                "@type": "Organization",
-                "name": "Amrytt Fitness",
-                "url": siteUrl,
-                "logo": {
-                  "@type": "ImageObject",
-                  "url": `${siteUrl}/images/logo.png`
-                }
-              },
-              "mainEntityOfPage": {
-                "@type": "WebPage",
-                "@id": blogUrl
-              },
-              "articleSection": blog.category,
-              "wordCount": blog.body ? blog.body.split(' ').length : 0,
-              ...(averageRating > 0 && {
-                "aggregateRating": {
-                  "@type": "AggregateRating",
-                  "ratingValue": averageRating.toFixed(1),
-                  "reviewCount": ratings.length,
-                  "bestRating": "5",
-                  "worstRating": "1"
-                }
-              })
-            })
-          }}
-        />
-        
-        {/* Structured Data - Breadcrumbs */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              "itemListElement": [
-                {
-                  "@type": "ListItem",
-                  "position": 1,
-                  "name": "Home",
-                  "item": siteUrl
-                },
-                {
-                  "@type": "ListItem",
-                  "position": 2,
-                  "name": "Articles",
-                  "item": `${siteUrl}/articles`
-                },
-                {
-                  "@type": "ListItem",
-                  "position": 3,
-                  "name": blog.title,
-                  "item": blogUrl
-                }
-              ]
-            })
-          }}
-        />
-        
-        {/* Structured Data - FAQ if comments exist */}
-        {combinedComments.length > 0 && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                "mainEntity": combinedComments.slice(0, 5).map(comment => ({
-                  "@type": "Question",
-                  "name": `Comment by ${comment.author}`,
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": comment.comment,
-                    "author": {
-                      "@type": "Person",
-                      "name": comment.author
-                    },
-                    "dateCreated": comment.date
-                  }
-                }))
-              })
-            }}
-          />
-        )}
-      </Head>
+      {generateBlogMetadata({ blog, comments, ratings })}
       
       <div className="bg-[#fafafa] min-h-screen">
       {/* Page Header */}
@@ -383,19 +241,19 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
               {/* Navigation Buttons */}
               <div className="border-t border-[#e5e6ea] pt-8 min-h-[104px]">
                 <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
-                  <div className="flex flex-col gap-2 flex-1">
-                    <button className="flex items-center gap-3 px-4 py-2 border border-[#05091c] rounded-sm">
-                      <svg className="w-4 h-4 rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="flex flex-col gap-2 items-start flex-1">
+                    <button className="cursor-pointer flex items-center gap-3 px-4 py-2 border border-[#05091c] rounded-sm hover:bg-[#05091c] hover:text-white transition-colors group">
+                      <svg className="w-4 h-4 rotate-90 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
-                      <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px]">Previous</span>
+                      <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px] group-hover:text-white">Previous</span>
                     </button>
-                    <span className="text-[#262d4d] text-sm leading-5 tracking-[1px]">5 Tips for Better Cardio Sessions</span>
+                    <span className="text-[#262d4d] text-sm leading-5 tracking-[1px] text-right">5 Tips for Better Cardio Sessions</span>
                   </div>
                   <div className="flex flex-col gap-2 items-end flex-1">
-                    <button className="flex items-center gap-3 px-4 py-2 border border-[#05091c] rounded-sm">
-                      <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px]">Next</span>
-                      <svg className="w-4 h-4 -rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                    <button className="cursor-pointer flex items-center gap-3 px-4 py-2 border border-[#05091c] rounded-sm hover:bg-[#05091c] hover:text-white transition-colors group">
+                      <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px] group-hover:text-white">Next</span>
+                      <svg className="w-4 h-4 -rotate-90 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </button>
@@ -590,7 +448,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
                 <textarea
                   value={newComment.comment}
                   onChange={(e) => setNewComment({ ...newComment, comment: e.target.value })}
-                  placeholder="Search anything..."
+                  placeholder="Write anything..."
                   className="flex-1 min-h-[120px] lg:min-h-0 bg-[#f5f5f5] rounded-[10px] px-6 py-6 text-black placeholder-gray-400 resize-none border-0 outline-none"
                 />
               </div>

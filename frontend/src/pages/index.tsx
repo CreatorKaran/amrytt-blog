@@ -1,98 +1,18 @@
 import { GetStaticProps } from 'next';
-import Head from 'next/head';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 import { Blog } from '@/types/blog';
 import { getAllBlogs, generateSlug } from '@/lib/api';
+import { generateHomeMetadata } from '@/lib/metadata';
 
 interface HomeProps {
   blogs: Blog[];
 }
 
 export default function Home({ blogs }: HomeProps) {
-  const siteTitle = "Amrytt Fitness Blog - Expert Fitness Tips & Guides";
-  const siteDescription = "Discover expert fitness tips, workout routines, nutrition advice, and wellness guides. Join our community of fitness enthusiasts and transform your health journey.";
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://amrytt-blog.com";
-
   return (
     <>
-      <Head>
-        <title>{siteTitle}</title>
-        <meta name="description" content={siteDescription} />
-        <meta name="keywords" content="fitness, workout, nutrition, health, wellness, exercise, gym, training, cardio, strength" />
-        <meta name="author" content="Amrytt Fitness" />
-        
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={siteUrl} />
-        <meta property="og:title" content={siteTitle} />
-        <meta property="og:description" content={siteDescription} />
-        <meta property="og:image" content={`${siteUrl}/images/og-home.jpg`} />
-        <meta property="og:site_name" content="Amrytt Fitness Blog" />
-        
-        {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={siteUrl} />
-        <meta property="twitter:title" content={siteTitle} />
-        <meta property="twitter:description" content={siteDescription} />
-        <meta property="twitter:image" content={`${siteUrl}/images/og-home.jpg`} />
-        
-        {/* Additional SEO */}
-        <meta name="robots" content="index, follow" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="canonical" href={siteUrl} />
-        
-        {/* Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "Amrytt Fitness Blog",
-              "description": siteDescription,
-              "url": siteUrl,
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": `${siteUrl}/search?q={search_term_string}`,
-                "query-input": "required name=search_term_string"
-              },
-              "publisher": {
-                "@type": "Organization",
-                "name": "Amrytt Fitness",
-                "url": siteUrl
-              }
-            })
-          }}
-        />
-        
-        {/* Blog List Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ItemList",
-              "itemListElement": blogs.map((blog, index) => ({
-                "@type": "ListItem",
-                "position": index + 1,
-                "item": {
-                  "@type": "BlogPosting",
-                  "headline": blog.title,
-                  "description": blog.excerpt,
-                  "url": `${siteUrl}/blog/${generateSlug(blog.title)}`,
-                  "datePublished": blog.date,
-                  "author": {
-                    "@type": "Person",
-                    "name": blog.author.name
-                  },
-                  "image": blog.image
-                }
-              }))
-            })
-          }}
-        />
-      </Head>
+      {generateHomeMetadata({ blogs })}
       
       <Layout>
       <div className="max-w-7xl mx-auto px-6 py-12">
