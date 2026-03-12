@@ -6,6 +6,9 @@ import {
   getBlogById,
   updateBlog,
   deleteBlog,
+  getRelatedArticles,
+  getExploreMore,
+  getTopGuides,
 } from '../controllers/blogController';
 import { validate, blogSchema, idSchema } from '../middleware/validation';
 
@@ -241,5 +244,125 @@ router.put('/:id', validate(blogSchema.keys({
  *         description: Blog not found
  */
 router.delete('/:id', validate(idSchema), deleteBlog);
+
+/**
+ * @swagger
+ * /api/blogs/{id}/related:
+ *   get:
+ *     summary: Get related articles for a blog post
+ *     tags: [Blogs]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Blog ID
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 4
+ *         description: Number of related articles to return
+ *     responses:
+ *       200:
+ *         description: List of related articles from the same category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 count:
+ *                   type: number
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Blog'
+ *       404:
+ *         description: Blog not found
+ */
+router.get('/:id/related', validate(idSchema), getRelatedArticles);
+
+/**
+ * @swagger
+ * /api/blogs/{id}/explore:
+ *   get:
+ *     summary: Get explore more articles for a blog post
+ *     tags: [Blogs]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Blog ID
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 4
+ *         description: Number of explore more articles to return
+ *     responses:
+ *       200:
+ *         description: List of articles from different categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 count:
+ *                   type: number
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Blog'
+ *       404:
+ *         description: Blog not found
+ */
+router.get('/:id/explore', validate(idSchema), getExploreMore);
+
+/**
+ * @swagger
+ * /api/blogs/{id}/top-guides:
+ *   get:
+ *     summary: Get top guides for sidebar
+ *     tags: [Blogs]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Blog ID
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 3
+ *         description: Number of top guides to return
+ *     responses:
+ *       200:
+ *         description: List of top guide articles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 count:
+ *                   type: number
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Blog'
+ *       404:
+ *         description: Blog not found
+ */
+router.get('/:id/top-guides', validate(idSchema), getTopGuides);
 
 export default router;

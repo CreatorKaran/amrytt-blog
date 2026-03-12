@@ -177,3 +177,39 @@ export function generateSlug(title: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 }
+
+// Get related articles for a blog post
+export async function getRelatedArticles(blogId: string, limit: number = 4): Promise<Blog[]> {
+  const response = await fetch(`${API_BASE_URL}/blogs/${blogId}/related?limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const result = await handleResponse<ApiResponse<Blog[]>>(response);
+  return result.data;
+}
+
+// Get explore more articles for a blog post
+export async function getExploreMore(blogId: string, limit: number = 4): Promise<Blog[]> {
+  const response = await fetch(`${API_BASE_URL}/blogs/${blogId}/explore?limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const result = await handleResponse<ApiResponse<Blog[]>>(response);
+  return result.data;
+}
+
+// Get top guides for sidebar
+export async function getTopGuides(blogId: string, limit: number = 3): Promise<Blog[]> {
+  const response = await fetch(`${API_BASE_URL}/blogs/${blogId}/top-guides?limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const result = await handleResponse<ApiResponse<Blog[]>>(response);
+  return result.data;
+}

@@ -6,9 +6,19 @@ import Layout from '@/components/Layout';
 import CommentCard from '@/components/CommentCard';
 import CommentSkeleton from '@/components/CommentSkeleton';
 import RelatedArticles from '@/components/RelatedArticles';
+import ExploreMore from '@/components/ExploreMore';
 import StarRating from '@/components/StarRating';
 import { Blog, Comment, Rating } from '@/types/blog';
-import { getAllBlogs, getBlogById, getCommentsByBlogId, getRatingsByBlogId, generateSlug } from '@/lib/api';
+import { 
+  getAllBlogs, 
+  getBlogById, 
+  getCommentsByBlogId, 
+  getRatingsByBlogId, 
+  getRelatedArticles,
+  getExploreMore,
+  getTopGuides,
+  generateSlug 
+} from '@/lib/api';
 
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
   ssr: false,
@@ -18,6 +28,8 @@ const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
 interface BlogPostProps {
   blog: Blog;
   relatedArticles: Blog[];
+  exploreMore: Blog[];
+  topGuides: Blog[];
 }
 
 // Combine comments and ratings into a single display format
@@ -25,7 +37,7 @@ interface CombinedComment extends Comment {
   rating?: number;
 }
 
-export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
+export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides }: BlogPostProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
@@ -215,7 +227,7 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
             <aside className="lg:sticky lg:top-24 h-fit">
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-8">
                 <h3 className="text-lg font-bold mb-6 text-gray-900">Top Guides</h3>
-                {relatedArticles.slice(0, 3).map((article) => {
+                {topGuides?.slice(0, 3).map((article) => {
                   const articleSlug = generateSlug(article.title);
                   return (
                     <a 
@@ -249,7 +261,8 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
       </article>
 
       <div className="max-w-7xl mx-auto px-6">
-        <RelatedArticles articles={relatedArticles.slice(0, 4)} />
+        <RelatedArticles articles={relatedArticles} />
+        <ExploreMore articles={exploreMore} />
       </div>
     </Layout>
   );
@@ -290,14 +303,18 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     }
 
     // Get related articles from the same category
-    const relatedArticles = blogs
-      .filter((b) => b._id !== blog._id && b.category === blog.category)
-      .slice(0, 4);
+    const [relatedArticles, exploreMore, topGuides] = await Promise.all([
+      getRelatedArticles(blog._id, 4),
+      getExploreMore(blog._id, 4),
+      getTopGuides(blog._id, 3)
+    ]);
 
     return {
       props: {
         blog,
         relatedArticles,
+        exploreMore,
+        topGuides,
       },
       revalidate: 60, // Revalidate every 60 seconds
     };
