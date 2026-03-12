@@ -210,3 +210,42 @@ export async function getTopGuides(blogId: string, limit: number = 3): Promise<B
   const result = await handleResponse<ApiResponse<Blog[]>>(response);
   return result.data;
 }
+
+// New comprehensive endpoint to get blog by slug with all related data
+export interface BlogBySlugResponse {
+  blog: Blog;
+  relatedArticles: Blog[];
+  exploreMore: Blog[];
+  tourGuides: Blog[];
+  navigation: {
+    previous: {
+      slug: string;
+      title: string;
+    };
+    next: {
+      slug: string;
+      title: string;
+    };
+  };
+}
+
+export async function getBlogBySlug(slug: string): Promise<BlogBySlugResponse> {
+  const url = `${API_BASE_URL}/blogs/slug/${slug}`;
+  console.log('Fetching blog by slug from:', url);
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    const result = await handleResponse<ApiResponse<BlogBySlugResponse>>(response);
+    console.log('Blog fetched successfully by slug:', slug);
+    return result.data;
+  } catch (error) {
+    console.error('Error in getBlogBySlug:', error);
+    throw error;
+  }
+}

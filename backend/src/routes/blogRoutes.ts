@@ -9,6 +9,7 @@ import {
   getRelatedArticles,
   getExploreMore,
   getTopGuides,
+  getBlogBySlug,
 } from '../controllers/blogController';
 import { validate, blogSchema, idSchema } from '../middleware/validation';
 
@@ -364,5 +365,77 @@ router.get('/:id/explore', validate(idSchema), getExploreMore);
  *         description: Blog not found
  */
 router.get('/:id/top-guides', validate(idSchema), getTopGuides);
+
+/**
+ * @swagger
+ * /api/blogs/slug/{slug}:
+ *   get:
+ *     summary: Get blog post by slug with all related data
+ *     tags: [Blogs]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Blog slug (generated from title)
+ *         example: ultimate-guide-full-body-workouts
+ *     responses:
+ *       200:
+ *         description: Blog details with related content and navigation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     blog:
+ *                       $ref: '#/components/schemas/Blog'
+ *                     relatedArticles:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Blog'
+ *                       description: Articles from the same category
+ *                     exploreMore:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Blog'
+ *                       description: Articles from different categories
+ *                     tourGuides:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Blog'
+ *                       description: Articles by different authors
+ *                     navigation:
+ *                       type: object
+ *                       properties:
+ *                         previous:
+ *                           type: object
+ *                           properties:
+ *                             slug:
+ *                               type: string
+ *                             title:
+ *                               type: string
+ *                         next:
+ *                           type: object
+ *                           properties:
+ *                             slug:
+ *                               type: string
+ *                             title:
+ *                               type: string
+ *       404:
+ *         description: Blog not found
+ */
+const slugSchema = Joi.object({
+  params: Joi.object({
+    slug: Joi.string().required()
+  }).required()
+});
+
+router.get('/slug/:slug', validate(slugSchema), getBlogBySlug);
 
 export default router;

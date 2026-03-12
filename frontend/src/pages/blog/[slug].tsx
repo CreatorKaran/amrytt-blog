@@ -7,10 +7,9 @@ import {
   getAllBlogs,
   getCommentsByBlogId,
   getRatingsByBlogId,
-  getRelatedArticles,
-  getExploreMore,
-  getTopGuides,
-  generateSlug
+  generateSlug,
+  getBlogBySlug,
+  BlogBySlugResponse
 } from '@/lib/api';
 import { generateBlogMetadata } from '@/lib/metadata';
 import Link from 'next/link';
@@ -18,10 +17,7 @@ import RelatedArticles from '@/components/RelatedArticles';
 import ExploreMore from '@/components/ExploreMore';
 
 interface BlogPostProps {
-  blog: Blog;
-  relatedArticles: Blog[];
-  exploreMore: Blog[];
-  topGuides: Blog[];
+  blogData: BlogBySlugResponse;
 }
 
 // Combine comments and ratings into a single display format
@@ -104,7 +100,8 @@ function InteractiveStarRating({ rating, onRatingChange }: { rating: number; onR
   );
 }
 
-export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides }: BlogPostProps) {
+export default function BlogPost({ blogData }: BlogPostProps) {
+  const { blog, relatedArticles, exploreMore, tourGuides, navigation } = blogData;
   const [comments, setComments] = useState<Comment[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
@@ -275,21 +272,21 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
                   Tour Guides
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6 w-full">
-                  {topGuides?.slice(0, 3).map((guide, index) => (
+                  {tourGuides?.slice(0, 3).map((guide, index) => (
                     <div key={guide._id} className="flex flex-col gap-4 lg:gap-6 w-full">
                       <div className="flex flex-col gap-3 lg:gap-4 w-full">
                         <div className="flex items-start gap-4 w-full">
                           <img
                             src={guide.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide.author.name)}&background=2563eb&color=fff`}
                             alt={guide.author.name}
-                            className="w-[60px] h-[60px] rounded-full object-cover flex-shrink-0"
+                            className="w-[60px] h-[60px] rounded-full object-cover shrink-0"
                           />
                           <div className="flex flex-col gap-1 flex-1 min-w-0">
                             <h4 className="text-black text-base leading-7 tracking-[1px]">
                               {guide.author.name}
                             </h4>
                             <div className="flex items-center gap-2">
-                              <svg className="w-5 h-5 text-black flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-5 h-5 text-black shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                               </svg>
                               <span className="text-black text-sm leading-5 tracking-[1px] opacity-80 truncate">
@@ -510,29 +507,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   try {
     const slug = params?.slug as string;
 
-    // Fetch all blogs to find the one matching the slug
-    const blogs = await getAllBlogs();
-    const blog = blogs.find((b) => generateSlug(b.title) === slug);
-
-    if (!blog) {
-      return {
-        notFound: true,
-      };
-    }
-
-    // Get related articles from the same category
-    const [relatedArticles, exploreMore, topGuides] = await Promise.all([
-      getRelatedArticles(blog._id, 4),
-      getExploreMore(blog._id, 4),
-      getTopGuides(blog._id, 3)
-    ]);
+    // Use the new comprehensive API endpoint
+    const blogData = await getBlogBySlug(slug);
 
     return {
       props: {
-        blog,
-        relatedArticles,
-        exploreMore,
-        topGuides,
+        blogData,
       },
       revalidate: 60, // Revalidate every 60 seconds
     };

@@ -227,3 +227,129 @@ export const getTopGuides = async (
     next(error);
   }
 };
+
+// Helper function to generate slug from title
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9 -]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+};
+
+export const getBlogBySlug = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { slug } = req.params;
+
+    // Get all blogs to find the one matching the slug
+    const allBlogs = await Blog.find().sort({ date: -1 });
+    
+    // Find the blog that matches the slug
+    const blog = allBlogs.find(b => generateSlug(b.title) === slug);
+
+    if (!blog) {
+      res.status(404).json({
+        success: false,
+        error: 'Blog not found',
+      });
+      return;
+    }
+
+    // Get current blog index for navigation
+    const currentIndex = allBlogs.findIndex(b => b._id.toString() === blog._id.toString());
+    
+    // Get previous and next blog slugs with circular navigation
+    let previousBlog: typeof allBlogs[0];
+    let nextBlog: typeof allBlogs[0];
+    
+    if (allBlogs.length === 1) {
+      // If there's only one blog, both previous and next point to the same blog
+      previousBlog = allBlogs[0]!;
+      nextBlog = allBlogs[0]!;
+    } else {
+      // Get previous and next blog slugs with circular navigation
+      previousBlog = currentIndex < allBlogs.length - 1 
+        ? allBlogs[currentIndex + 1]! 
+        : allBlogs[0]!; // Loop to first blog if at the end
+      
+      nextBlog = currentIndex > 0 
+        ? allBlogs[currentIndex - 1]! 
+        : allBlogs[allBlogs.length - 1]!; // Loop to last blog if at the beginning
+    }
+
+    // Get related articles from the same category (excluding current blog)
+    const relatedArticles = await Blog.find({
+      _id: { $ne: blog._id },
+      category: blog.category,
+    })
+      .sort({ date: -1 })
+      .limit(4);
+
+    // Get explore more articles from different categories (excluding current blog)
+    const exploreMore = await Blog.find({
+      _id: { $ne: blog._id },
+      category: { $ne: blog.category },
+    })
+      .sort({ date: -1 })
+      .limit(4);
+
+    // Get unique authors for tour guides (excluding current blog author)
+    const uniqueAuthors = await Blog.aggregate([
+      {
+        $match: {
+          _id: { $ne: blog._id },
+          'author.name': { $ne: blog.author.name }
+        }
+      },
+      {
+        $group: {
+          _id: '$author.name',
+          blog: { $first: '$$ROOT' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1, 'blog.date': -1 }
+      },
+      {
+        $limit: 3
+      },
+      {
+        $replaceRoot: { newRoot: '$blog' }
+      }
+    ]);
+
+    const tourGuides = uniqueAuthors.length > 0 ? uniqueAuthors : await Blog.find({
+      _id: { $ne: blog._id },
+    })
+      .sort({ date: -1 })
+      .limit(3);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        blog,
+        relatedArticles,
+        exploreMore,
+        tourGuides,
+        navigation: {
+          previous: {
+            slug: generateSlug(previousBlog.title),
+            title: previousBlog.title
+          },
+          next: {
+            slug: generateSlug(nextBlog.title),
+            title: nextBlog.title
+          }
+        }
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
