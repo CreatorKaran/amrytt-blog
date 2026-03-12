@@ -44,10 +44,13 @@ const startServer = async (): Promise<void> => {
   try {
     await connectDatabase();
     await seedDatabase();
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
     });
+
+    server.keepAliveTimeout = 120 * 1000;
+    server.headersTimeout = 120 * 1000;
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

@@ -4,6 +4,7 @@ export interface Author {
 }
 
 export interface Blog {
+  id?: string;
   _id: string;
   title: string;
   excerpt: string;
