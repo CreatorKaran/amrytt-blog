@@ -6,6 +6,7 @@ import { connectDatabase } from './config/database';
 import { seedDatabase } from './config/seed';
 import { swaggerSpec } from './config/swagger';
 import { errorHandler } from './middleware/errorHandler';
+import { apiLogger, errorLogger } from './middleware/logger';
 import blogRoutes from './routes/blogRoutes';
 import commentRoutes from './routes/commentRoutes';
 import ratingRoutes from './routes/ratingRoutes';
@@ -20,6 +21,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// API logging middleware (before routes)
+app.use(apiLogger);
+
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -32,6 +36,9 @@ app.use('/api/ratings', ratingRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
+
+// Error logging middleware (before error handler)
+app.use(errorLogger);
 
 // Error handling middleware
 app.use(errorHandler);
