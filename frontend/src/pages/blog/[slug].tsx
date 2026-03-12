@@ -38,6 +38,27 @@ interface CombinedComment extends Comment {
   rating?: number;
 }
 
+// Star Rating Component for Comments
+function CommentStarRating({ rating }: { rating: number }) {
+  const stars = Array.from({ length: 5 }, (_, i) => i + 1);
+  
+  return (
+    <div className="flex gap-1 items-center">
+      {stars.map((star) => (
+        <svg
+          key={star}
+          className={`w-[18px] h-[18px] ${
+            star <= rating ? 'text-yellow-400' : 'text-gray-300'
+          }`}
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
 export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides }: BlogPostProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
@@ -46,6 +67,12 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(blog.body);
+  const [newComment, setNewComment] = useState({
+    name: '',
+    email: '',
+    comment: '',
+    rating: 5
+  });
 
   useEffect(() => {
     const fetchCommentsAndRatings = async () => {
@@ -74,7 +101,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
   }, [blog._id]);
 
   const formatDate = (dateString: string) => {
-    return moment(dateString).format('MMMM DD, YYYY');
+    return moment(dateString).format('DD MMMM YYYY');
   };
 
   const handleSaveEdit = (content: string) => {
@@ -98,155 +125,407 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const totalCount = comments.length + ratings.length;
-
   return (
-    <Layout>
-      <article className="bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <header className="py-12 text-center">
-            <p className="text-xs font-semibold tracking-widest text-gray-400 mb-4 uppercase">
-              HOME / ARTICLES
-            </p>
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight text-gray-900 max-w-4xl mx-auto">
-              {blog.title}
-            </h1>
-          </header>
-
-          <div className="mb-12 rounded-xl overflow-hidden shadow-md">
-            <img 
-              src={blog.image} 
-              alt={blog.title}
-              className="w-full h-auto aspect-video object-cover"
-            />
+    <div className="bg-[#fafafa] min-h-screen">
+      {/* Page Header */}
+      <div className="flex flex-col items-center justify-center py-16 px-6">
+        <div className="flex flex-col items-center gap-1 text-center">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1 text-[#262d4d] text-sm font-bold tracking-[1px] uppercase mb-4">
+            <span>Home</span>
+            <span>/</span>
+            <span className="font-normal">Articles</span>
+            <span>/</span>
           </div>
+          
+          {/* Title */}
+          <h1 className="text-[#10152e] text-5xl font-semibold leading-[66px] tracking-[1px] text-center max-w-4xl">
+            {blog.title}
+          </h1>
+        </div>
+      </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12 mb-12">
-            <div className="min-w-0">
-              <div className="flex items-center gap-4 pb-8 border-b border-gray-200 mb-8">
+      {/* Hero Image */}
+      <div className="relative h-[560px] w-full overflow-hidden">
+        <img 
+          src={blog.image} 
+          alt={blog.title}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex justify-center">
+        <div className="flex gap-5 w-[1200px] max-w-full px-6">
+          {/* Article Content */}
+          <div className="flex-1 flex flex-col gap-8 pb-16">
+            {/* Article Meta */}
+            <div className="flex items-center justify-between py-6 border-b border-[#e5e6ea]">
+              <div className="flex items-center gap-3">
                 <img 
                   src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`} 
                   alt={blog.author.name}
-                  className="w-12 h-12 rounded-full object-cover"
+                  className="w-8 h-8 rounded-full object-cover"
                 />
-                <div className="flex flex-col gap-1">
-                  <span className="font-semibold text-base text-gray-900">{blog.author.name}</span>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <time>{formatDate(blog.date)}</time>
-                    <span>•</span>
-                    <span className="text-blue-600 font-medium">{blog.category}</span>
-                  </div>
-                </div>
+                <span className="text-[#4e5265] text-base font-semibold tracking-[1px] uppercase">
+                  {blog.author.name}
+                </span>
               </div>
-
-              <div className="text-lg leading-relaxed text-gray-900">
-                <MarkdownRenderer content={editedContent} />
+              <div className="flex items-center gap-3 text-[#4e5265] text-base font-semibold tracking-[1px] uppercase">
+                <span>{moment(blog.date).format('DD MMMM')}</span>
+                <span>{moment(blog.date).format('YYYY')}</span>
               </div>
-
-              <div className="my-8 py-8 border-t border-b border-gray-200">
-                <button 
-                  className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold text-sm transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  {isEditing ? 'Cancel Edit' : 'Edit'}
-                </button>
-              </div>
-
-              {isEditing && (
-                <MarkdownEditor
-                  initialContent={editedContent}
-                  onSave={handleSaveEdit}
-                  onCancel={() => setIsEditing(false)}
-                />
-              )}
-
-              <section className="mt-12">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b-2 border-gray-200 gap-4">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {totalCount} {totalCount === 1 ? 'Review' : 'Reviews'}
-                  </h2>
-                  {averageRating > 0 && (
-                    <div className="flex items-center gap-2">
-                      <StarRating rating={Math.round(averageRating)} size="medium" />
-                      <span className="text-lg font-semibold text-gray-900">
-                        {averageRating.toFixed(1)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {isLoadingComments && (
-                  <div className="flex flex-col gap-6">
-                    <CommentSkeleton />
-                    <CommentSkeleton />
-                  </div>
-                )}
-
-                {commentsError && (
-                  <div className="p-8 bg-red-50 border border-red-200 rounded-lg text-red-600 text-center">
-                    <p>{commentsError}</p>
-                  </div>
-                )}
-
-                {!isLoadingComments && !commentsError && combinedComments.length === 0 && (
-                  <p className="py-12 text-center text-gray-400 italic">
-                    No reviews yet. Be the first to review!
-                  </p>
-                )}
-
-                {!isLoadingComments && !commentsError && combinedComments.length > 0 && (
-                  <div className="flex flex-col gap-6">
-                    {combinedComments.map((comment) => (
-                      <CommentCard key={comment._id} comment={comment} />
-                    ))}
-                  </div>
-                )}
-              </section>
             </div>
 
-            <aside className="lg:sticky lg:top-24 h-fit">
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-8">
-                <h3 className="text-lg font-bold mb-6 text-gray-900">Top Guides</h3>
-                {topGuides?.slice(0, 3).map((article) => {
-                  const articleSlug = generateSlug(article.title);
-                  return (
-                    <a 
-                      key={article._id}
-                      href={`/blog/${articleSlug}`}
-                      className="flex gap-4 py-4 border-b border-gray-200 last:border-b-0 transition-transform hover:translate-x-1"
-                    >
-                      <img 
-                        src={article.image} 
-                        alt={article.title}
-                        className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                      />
-                      <div className="flex flex-col gap-1 flex-1 min-w-0">
-                        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-                          {article.category}
-                        </span>
-                        <h4 className="text-sm font-semibold leading-snug text-gray-900 line-clamp-2">
-                          {article.title}
-                        </h4>
-                        <time className="text-xs text-gray-400">
-                          {moment(article.date).format('MMMM DD, YYYY')}
-                        </time>
-                      </div>
-                    </a>
-                  );
-                })}
+            {/* Article Excerpt */}
+            <p className="text-[#10152e] text-base leading-6 tracking-[1px]">
+              {blog.excerpt}
+            </p>
+
+            {/* Article Body */}
+            <div className="text-[#10152e] text-base leading-6 tracking-[1px] space-y-6">
+              <MarkdownRenderer content={editedContent} />
+            </div>
+            
+
+            {/* Author Section */}
+            <div className="flex flex-col gap-8">
+              <div className="border-t border-[#e5e6ea] pt-6 h-[296px] px-6">
+                <div className="flex items-start gap-2 mb-3">
+                  <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">About</span>
+                  <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">{blog.author.name}</span>
+                </div>
+                <div className="flex flex-col items-center gap-3">
+                  <img 
+                    src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`} 
+                    alt={blog.author.name}
+                    className="w-[100px] h-[100px] rounded-full object-cover"
+                  />
+                  <p className="text-[#4e5265] text-base italic font-semibold leading-6 tracking-[1px] text-center">
+                    With over a decade in fitness, {blog.author.name} specializes in strength training. Certified by NASM, he designs challenging yet achievable workout programs. His passion is helping clients build strength and confidence through personalized routines. Outside the gym, {blog.author.name} enjoys running and outdoor adventures.
+                  </p>
+                </div>
               </div>
-            </aside>
+              {/* Navigation Buttons */}
+              <div className="border-t border-[#e5e6ea] pt-8 h-[104px]">
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col gap-2">
+                    <button className="flex items-center gap-3 px-4 py-2 border border-[#05091c] rounded-sm">
+                      <svg className="w-4 h-4 rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px]">Previous</span>
+                    </button>
+                    <span className="text-[#262d4d] text-sm leading-5 tracking-[1px]">5 Tips for Better Cardio Sessions</span>
+                  </div>
+                  <div className="flex flex-col gap-2 items-end">
+                    <button className="flex items-center gap-3 px-4 py-2 border border-[#05091c] rounded-sm">
+                      <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px]">Next</span>
+                      <svg className="w-4 h-4 -rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    <span className="text-[#262d4d] text-sm leading-5 tracking-[1px] text-right">Meal Prep Basics for Gym Enthusiasts</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="w-[341px] px-5 py-6">
+            <div className="flex flex-col gap-[100px]">
+              {/* Explore More */}
+              <div className="flex flex-col gap-10">
+                <h3 className="text-[#10152e] text-xl font-semibold leading-7 tracking-[1px]">
+                  Explore more
+                </h3>
+                <div className="flex flex-col gap-10">
+                  {exploreMore?.slice(0, 3).map((article, index) => (
+                    <div key={article._id} className="flex flex-col gap-6">
+                      <div className="flex flex-col gap-6">
+                        <img 
+                          src={article.image} 
+                          alt={article.title}
+                          className="w-full h-[165px] object-cover"
+                        />
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-black text-sm font-medium tracking-[1px]">
+                              {article.category}
+                            </span>
+                            <div className="w-0 h-4 border-l border-gray-300 rotate-90"></div>
+                            <span className="text-[#757575] text-sm tracking-[1px]">
+                              {moment(article.date).format('DD MMM YYYY')}
+                            </span>
+                          </div>
+                          <p className="text-[#121212] text-base leading-6 tracking-[1px]">
+                            {article.title}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Tour Guides */}
+              <div className="flex flex-col gap-10">
+                <h3 className="text-[#10152e] text-xl font-semibold leading-7 tracking-[1px]">
+                  Tour Guides
+                </h3>
+                <div className="flex flex-col gap-6">
+                  {topGuides?.slice(0, 3).map((guide, index) => (
+                    <div key={guide._id} className="flex flex-col gap-6">
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-start gap-4">
+                          <img 
+                            src={guide.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide.author.name)}&background=2563eb&color=fff`} 
+                            alt={guide.author.name}
+                            className="w-[60px] h-[60px] rounded-full object-cover"
+                          />
+                          <div className="flex flex-col gap-1">
+                            <h4 className="text-black text-base leading-7 tracking-[1px]">
+                              {guide.author.name}
+                            </h4>
+                            <div className="flex items-center gap-2">
+                              <svg className="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-black text-sm leading-5 tracking-[1px] opacity-80">
+                                Location, Region
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CommentStarRating rating={5} />
+                          <span className="text-[#121212] text-[15px] leading-normal tracking-[0.5px]">
+                            (5.0)
+                          </span>
+                        </div>
+                      </div>
+                      {index < 2 && <div className="w-full h-px bg-gray-200"></div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </article>
-
-      <div className="max-w-7xl mx-auto px-6">
-        <RelatedArticles articles={relatedArticles} />
-        <ExploreMore articles={exploreMore} />
       </div>
-    </Layout>
+      {/* Comments Section */}
+      <div className="flex flex-col gap-8 py-8 px-6 max-w-[1200px] mx-auto">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-3 bg-black rounded-xl"></div>
+          <h2 className="text-black text-xl font-medium leading-normal tracking-[1px] capitalize">
+            comments
+          </h2>
+        </div>
+
+        {/* Display Comments */}
+        {!isLoadingComments && !commentsError && combinedComments.length > 0 && (
+          <div className="flex flex-col gap-8">
+            {combinedComments.slice(0, 2).map((comment, index) => (
+              <div key={comment._id}>
+                <div className="flex gap-5 items-start">
+                  <img 
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author)}&background=2563eb&color=fff`} 
+                    alt={comment.author}
+                    className="w-[60px] h-[60px] rounded-full object-cover"
+                  />
+                  <div className="flex-1 flex flex-col gap-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-black text-base leading-5 tracking-[1px]">
+                          {comment.author}
+                        </span>
+                        {comment.rating && (
+                          <div className="flex items-center gap-3">
+                            <CommentStarRating rating={comment.rating} />
+                            <span className="text-[#121212] text-[15px] leading-normal tracking-[0.5px]">
+                              ({comment.rating}.0)
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[#757575] text-sm leading-normal tracking-[1px]">
+                        {moment(comment.date).format('DD MMM YYYY')}
+                      </span>
+                    </div>
+                    <p className="text-[#10152e] text-base leading-6 tracking-[1px] opacity-80">
+                      {comment.comment}
+                    </p>
+                  </div>
+                </div>
+                {index < combinedComments.length - 1 && (
+                  <div className="w-full h-px bg-gray-200 mt-8"></div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {isLoadingComments && (
+          <div className="flex flex-col gap-6">
+            <CommentSkeleton />
+            <CommentSkeleton />
+          </div>
+        )}
+
+        {commentsError && (
+          <div className="p-8 bg-red-50 border border-red-200 rounded-lg text-red-600 text-center">
+            <p>{commentsError}</p>
+          </div>
+        )}
+      </div>
+      {/* Add Comment Section */}
+      <div className="flex flex-col gap-8 pb-8 px-6 max-w-[1200px] mx-auto">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-3 bg-black rounded-xl"></div>
+          <h2 className="text-black text-xl font-medium leading-normal tracking-[1px] capitalize">
+            Add a comment
+          </h2>
+        </div>
+
+        <div className="flex flex-col gap-5">
+          <div className="flex gap-6">
+            <div className="flex-1 flex flex-col gap-5">
+              {/* Name Field */}
+              <div className="relative">
+                <label className="text-[#3e3232] text-base font-medium tracking-[1px] capitalize">
+                  name
+                </label>
+                <input
+                  type="text"
+                  value={newComment.name}
+                  onChange={(e) => setNewComment({...newComment, name: e.target.value})}
+                  className="w-full h-12 bg-[#f5f5f5] rounded-xl px-4 mt-2 text-black"
+                />
+              </div>
+
+              {/* Email Field */}
+              <div className="relative">
+                <label className="text-[#3e3232] text-base font-medium tracking-[1px] capitalize">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={newComment.email}
+                  onChange={(e) => setNewComment({...newComment, email: e.target.value})}
+                  className="w-full h-12 bg-[#f5f5f5] rounded-xl px-4 mt-2 text-black"
+                />
+              </div>
+            </div>
+
+            {/* Comment Field */}
+            <div className="flex-1 flex flex-col gap-4 h-[184px]">
+              <label className="text-[#3e3232] text-base font-medium tracking-[1px] capitalize">
+                Comment
+              </label>
+              <textarea
+                value={newComment.comment}
+                onChange={(e) => setNewComment({...newComment, comment: e.target.value})}
+                placeholder="Search anything..."
+                className="flex-1 bg-[#f5f5f5] rounded-[10px] px-6 py-6 text-black placeholder-gray-400 resize-none"
+              />
+            </div>
+          </div>
+          <div className="flex gap-6 items-center">
+            {/* Rating Section */}
+            <div className="flex-1 bg-[#f5f5f5] rounded-xl px-4 py-1 flex items-center justify-between">
+              <span className="text-black text-base font-medium tracking-[1px] capitalize">
+                Rate the usefulness of the article
+              </span>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setNewComment({...newComment, rating: star})}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      star === newComment.rating ? 'bg-[#00ba5c]' : ''
+                    }`}
+                  >
+                    <svg
+                      className={`w-4 h-4 ${
+                        star <= newComment.rating ? 'text-white' : 
+                        star === 1 ? 'text-[#ff0412]' :
+                        star === 2 ? 'text-[#ff6700]' :
+                        star === 3 ? 'text-[#ffb416]' :
+                        'text-[#1c9af4]'
+                      }`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </button>
+                ))}
+                {newComment.rating === 5 && (
+                  <div className="bg-[#00ba5c] flex items-center gap-2 px-4 py-2 rounded-xl ml-2">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span className="text-white text-sm font-medium tracking-[0.14px] capitalize leading-5">
+                      good
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Send Button */}
+            <button className="bg-black flex items-center gap-2 px-4 py-3 rounded-xl h-12 w-[109px] justify-center">
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+              </svg>
+              <span className="text-white text-sm font-medium tracking-[0.14px] capitalize leading-5">
+                Send
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Related Articles */}
+      <div className="bg-[#f5f5f6] py-16">
+        <div className="max-w-[1440px] mx-auto px-6">
+          <div className="flex flex-col items-center mb-16">
+            <div className="max-w-[984px] text-center">
+              <h2 className="text-[#262d4d] text-5xl font-semibold leading-[66px] tracking-[1px]">
+                Related articles
+              </h2>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-6 justify-center max-w-[984px] mx-auto">
+            {relatedArticles?.slice(0, 4).map((article) => (
+              <div key={article._id} className="flex flex-col gap-3 w-[228px]">
+                <div className="relative w-full">
+                  <img 
+                    src={article.image} 
+                    alt={article.title}
+                    className="w-full h-[240px] object-cover"
+                  />
+                </div>
+                <h3 className="text-[#10152e] text-xl font-semibold leading-[30px] tracking-[1px] capitalize">
+                  {article.title}
+                </h3>
+                <div className="flex flex-col items-center justify-center">
+                  <p className="text-[#4e5265] text-base leading-6 tracking-[1px]">
+                    {article.excerpt}
+                  </p>
+                </div>
+                <div className="flex items-start gap-1 text-black text-sm font-medium leading-5 tracking-[1px] text-center">
+                  <span>By</span>
+                  <span>{article.author.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const blogs = await getAllBlogs();
