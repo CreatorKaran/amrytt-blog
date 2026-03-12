@@ -45,9 +45,6 @@ export async function getAllBlogs(): Promise<Blog[]> {
         'Content-Type': 'application/json',
       },
     });
-
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
     
     const result = await handleResponse<ApiResponse<Blog[]>>(response);
     console.log('Blogs fetched successfully:', result.data?.length || 0, 'blogs');

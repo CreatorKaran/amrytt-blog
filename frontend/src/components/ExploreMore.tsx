@@ -1,5 +1,6 @@
 import { Blog } from '@/types/blog';
 import moment from 'moment';
+import Link from 'next/link';
 import { generateSlug } from '@/lib/api';
 
 interface ExploreMoreProps {
@@ -18,7 +19,7 @@ export default function ExploreMore({ articles }: ExploreMoreProps) {
         {articles?.map((article) => {
           const slug = generateSlug(article.title);
           return (
-            <a 
+            <Link 
               key={article._id} 
               href={`/blog/${slug}`}
               className="bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-250 hover:-translate-y-1 hover:shadow-lg hover:border-blue-600 flex flex-col"
@@ -46,7 +47,7 @@ export default function ExploreMore({ articles }: ExploreMoreProps) {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
           );
         })}
       </div>

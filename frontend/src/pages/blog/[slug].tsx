@@ -12,6 +12,7 @@ import {
   getTopGuides,
   generateSlug 
 } from '@/lib/api';
+import Link from 'next/link';
 
 interface BlogPostProps {
   blog: Blog;
@@ -159,7 +160,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
         <div className="flex flex-col items-center gap-1 text-center max-w-4xl px-6">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-1 text-[#262d4d] text-sm font-bold tracking-[1px] uppercase mb-4">
-            <span className="font-bold">Home</span>
+            <Link href={'/'}><span className="font-bold">Home</span></Link>
             <span className="font-normal">/</span>
             <span className="font-normal">Articles</span>
             <span className="font-normal">/</span>

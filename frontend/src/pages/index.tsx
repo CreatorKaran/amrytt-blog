@@ -1,5 +1,6 @@
 import { GetStaticProps } from 'next';
 import moment from 'moment';
+import Link from 'next/link';
 import Layout from '@/components/Layout';
 import { Blog } from '@/types/blog';
 import { getAllBlogs, generateSlug } from '@/lib/api';
@@ -19,7 +20,7 @@ export default function Home({ blogs }: HomeProps) {
           {blogs.map((blog) => {
             const slug = generateSlug(blog.title);
             return (
-              <a 
+              <Link 
                 key={blog._id} 
                 href={`/blog/${slug}`}
                 className="border border-gray-200 rounded-xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg block"
@@ -41,7 +42,7 @@ export default function Home({ blogs }: HomeProps) {
                     <span>{moment(blog.date).format('MMM DD, YYYY')}</span>
                   </div>
                 </div>
-              </a>
+              </Link>
             );
           })}
         </div>
