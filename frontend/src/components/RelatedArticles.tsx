@@ -71,11 +71,11 @@ export default function RelatedArticles({ articles }: RelatedArticlesProps) {
                     className="w-full h-[240px] object-cover"
                   />
                 </div>
-                <h3 title={article.title} className="text-[#10152e] text-xl font-semibold leading-[30px] tracking-[1px] capitalize px-1">
+                <h3 title={article.title} className="text-[#10152e] text-xl font-semibold leading-[30px] tracking-[1px] capitalize px-1 line-clamp-2">
                   {article.title}
                 </h3>
                 <div className="flex flex-col items-center justify-center px-1">
-                  <p className="text-[#4e5265] text-base leading-6 tracking-[1px]">
+                  <p className="text-[#4e5265] text-base leading-6 tracking-[1px] line-clamp-3">
                     {article.excerpt}
                   </p>
                 </div>
