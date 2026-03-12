@@ -8,6 +8,7 @@ import CommentSkeleton from '@/components/CommentSkeleton';
 import RelatedArticles from '@/components/RelatedArticles';
 import ExploreMore from '@/components/ExploreMore';
 import StarRating from '@/components/StarRating';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Blog, Comment, Rating } from '@/types/blog';
 import { 
   getAllBlogs, 
@@ -81,28 +82,6 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
     setIsEditing(false);
   };
 
-  const renderContent = () => {
-    return editedContent.split('\n\n').map((paragraph, index) => {
-      if (paragraph.startsWith('## ')) {
-        return <h2 key={index} className="text-3xl font-bold mt-8 mb-6 leading-tight text-gray-900">{paragraph.replace('## ', '')}</h2>;
-      }
-      if (paragraph.startsWith('### ')) {
-        return <h3 key={index} className="text-2xl font-semibold mt-6 mb-4 leading-snug text-gray-900">{paragraph.replace('### ', '')}</h3>;
-      }
-      if (paragraph.startsWith('- ')) {
-        const items = paragraph.split('\n').filter(line => line.startsWith('- '));
-        return (
-          <ul key={index} className="my-6 pl-8 text-gray-600 space-y-2">
-            {items.map((item, i) => (
-              <li key={i} className="pl-2">{item.replace('- ', '')}</li>
-            ))}
-          </ul>
-        );
-      }
-      return <p key={index} className="mb-6 text-gray-600">{paragraph}</p>;
-    });
-  };
-
   // Combine comments and ratings for display
   const combinedComments: CombinedComment[] = [
     ...comments,
@@ -160,7 +139,7 @@ export default function BlogPost({ blog, relatedArticles, exploreMore, topGuides
               </div>
 
               <div className="text-lg leading-relaxed text-gray-900">
-                {renderContent()}
+                <MarkdownRenderer content={editedContent} />
               </div>
 
               <div className="my-8 py-8 border-t border-b border-gray-200">
