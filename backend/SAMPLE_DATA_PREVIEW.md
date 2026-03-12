@@ -267,16 +267,16 @@ Author avatars from pravatar.cc (placeholder service)
 
 ### View All Blogs
 ```bash
-curl http://localhost:5000/api/blogs | jq '.'
+curl http://localhost:5100/api/blogs | jq '.'
 ```
 
 ### View Specific Blog
 ```bash
 # Get first blog ID
-BLOG_ID=$(curl -s http://localhost:5000/api/blogs | jq -r '.data[0]._id')
+BLOG_ID=$(curl -s http://localhost:5100/api/blogs | jq -r '.data[0]._id')
 
 # Get blog details
-curl http://localhost:5000/api/blogs/$BLOG_ID | jq '.'
+curl http://localhost:5100/api/blogs/$BLOG_ID | jq '.'
 ```
 
 ### Filter by Category (Frontend Implementation)
@@ -321,7 +321,7 @@ export const seedBlogs = [
 
 1. Start the server: `npm run dev`
 2. Database auto-seeds with this data
-3. View in Swagger UI: http://localhost:5000/api-docs
+3. View in Swagger UI: http://localhost:5100/api-docs
 4. Test with frontend application
 5. Add comments and ratings to blogs
 6. Customize or add more blogs as needed

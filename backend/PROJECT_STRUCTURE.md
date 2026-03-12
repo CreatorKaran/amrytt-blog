@@ -162,7 +162,7 @@ GET    /health              Health check
 ## Environment Variables
 
 ```env
-PORT=5000                                    # Server port
+PORT=5100                                    # Server port
 MONGODB_URI=mongodb://localhost:27017/blog-api  # Database connection
 NODE_ENV=development                         # Environment
 ```

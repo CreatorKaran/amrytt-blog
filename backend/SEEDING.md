@@ -22,7 +22,7 @@ The system will:
 ✅ MongoDB connected successfully
 📦 Database is empty. Seeding data...
 ✅ Successfully seeded 6 blog posts
-🚀 Server running on port 5000
+🚀 Server running on port 5100
 ```
 
 ## Manual Seeding
@@ -150,11 +150,11 @@ After seeding, verify the data through:
 
 1. **API Endpoint:**
    ```bash
-   curl http://localhost:5000/api/blogs
+   curl http://localhost:5100/api/blogs
    ```
 
 2. **Swagger UI:**
-   Visit `http://localhost:5000/api-docs` and test the GET /api/blogs endpoint
+   Visit `http://localhost:5100/api-docs` and test the GET /api/blogs endpoint
 
 3. **MongoDB Compass:**
    Connect to your database and browse the `blogs` collection

@@ -80,7 +80,7 @@ backend/
    
    Edit `.env` file:
    ```env
-   PORT=5000
+   PORT=5100
    MONGODB_URI=mongodb://localhost:27017/blog-api
    NODE_ENV=development
    ```
@@ -150,7 +150,7 @@ backend/
 ### Create a Blog Post
 
 ```bash
-curl -X POST http://localhost:5000/api/blogs \
+curl -X POST http://localhost:5100/api/blogs \
   -H "Content-Type: application/json" \
   -d '{
     "title": "My First Blog",
@@ -168,7 +168,7 @@ curl -X POST http://localhost:5000/api/blogs \
 ### Add a Comment
 
 ```bash
-curl -X POST http://localhost:5000/api/comments/blog/{blogId} \
+curl -X POST http://localhost:5100/api/comments/blog/{blogId} \
   -H "Content-Type: application/json" \
   -d '{
     "author": "John Doe",
@@ -179,7 +179,7 @@ curl -X POST http://localhost:5000/api/comments/blog/{blogId} \
 ### Add a Rating
 
 ```bash
-curl -X POST http://localhost:5000/api/ratings/blog/{blogId} \
+curl -X POST http://localhost:5100/api/ratings/blog/{blogId} \
   -H "Content-Type: application/json" \
   -d '{
     "author": "Jane Smith",
@@ -261,7 +261,7 @@ The API uses a centralized error handling middleware that:
 ## Testing the API
 
 1. Start the server: `npm run dev`
-2. Visit `http://localhost:5000/api-docs` for interactive API documentation
+2. Visit `http://localhost:5100/api-docs` for interactive API documentation
 3. Use the Swagger UI to test all endpoints
 4. Or use tools like Postman, curl, or HTTPie
 

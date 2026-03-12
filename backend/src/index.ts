@@ -7,14 +7,12 @@ import { seedDatabase } from './config/seed';
 import { swaggerSpec } from './config/swagger';
 import { errorHandler } from './middleware/errorHandler';
 import { apiLogger, errorLogger } from './middleware/logger';
-import blogRoutes from './routes/blogRoutes';
-import commentRoutes from './routes/commentRoutes';
-import ratingRoutes from './routes/ratingRoutes';
+import appRoutes from './routes';
 
 dotenv.config();
 
 const app: Application = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5100;
 
 // Middleware
 app.use(cors());
@@ -28,9 +26,7 @@ app.use(apiLogger);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
-app.use('/api/blogs', blogRoutes);
-app.use('/api/comments', commentRoutes);
-app.use('/api/ratings', ratingRoutes);
+app.use('/api', appRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

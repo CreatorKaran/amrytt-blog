@@ -25,22 +25,22 @@
    ```
 
 5. **Access the API**
-   - API: http://localhost:5000
-   - Swagger Docs: http://localhost:5000/api-docs
-   - Health Check: http://localhost:5000/health
+   - API: http://localhost:5100
+   - Swagger Docs: http://localhost:5100/api-docs
+   - Health Check: http://localhost:5100/health
 
 ## Quick Test
 
 Create a blog post:
 ```bash
-curl -X POST http://localhost:5000/api/blogs \
+curl -X POST http://localhost:5100/api/blogs \
   -H "Content-Type: application/json" \
   -d '{"title":"Test Blog","body":"This is a test"}'
 ```
 
 View all blogs:
 ```bash
-curl http://localhost:5000/api/blogs
+curl http://localhost:5100/api/blogs
 ```
 
 ## Project Structure

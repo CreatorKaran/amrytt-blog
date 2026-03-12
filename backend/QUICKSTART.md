@@ -22,7 +22,7 @@ cp .env.example .env
 
 Edit `.env` if needed (default works for local MongoDB):
 ```env
-PORT=5000
+PORT=5100
 MONGODB_URI=mongodb://localhost:27017/blog-api
 NODE_ENV=development
 ```
@@ -45,25 +45,25 @@ You should see:
 ✅ MongoDB connected successfully
 📦 Database is empty. Seeding data...
 ✅ Successfully seeded 6 blog posts
-🚀 Server running on port 5000
-📚 API Documentation: http://localhost:5000/api-docs
+🚀 Server running on port 5100
+📚 API Documentation: http://localhost:5100/api-docs
 ```
 
 ## Test the API
 
 ### Option 1: Swagger UI (Recommended)
-Open your browser: http://localhost:5000/api-docs
+Open your browser: http://localhost:5100/api-docs
 
 ### Option 2: cURL
 ```bash
 # Get all blogs
-curl http://localhost:5000/api/blogs
+curl http://localhost:5100/api/blogs
 
 # Get specific blog
-curl http://localhost:5000/api/blogs/{blogId}
+curl http://localhost:5100/api/blogs/{blogId}
 
 # Create a blog
-curl -X POST http://localhost:5000/api/blogs \
+curl -X POST http://localhost:5100/api/blogs \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Test Blog",
