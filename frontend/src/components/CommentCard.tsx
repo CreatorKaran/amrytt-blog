@@ -1,19 +1,14 @@
-import React from 'react';
 import { Comment } from '@/types/blog';
+import moment from 'moment';
 import StarRating from './StarRating';
 
 interface CommentCardProps {
-  comment: Comment;
+  comment: Comment & { rating?: number };
 }
 
 export default function CommentCard({ comment }: CommentCardProps) {
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+    return moment(dateString).format('MMMM DD, YYYY');
   };
 
   return (
@@ -24,7 +19,7 @@ export default function CommentCard({ comment }: CommentCardProps) {
         </div>
         <div className="flex-1 flex flex-col gap-1">
           <h4 className="font-semibold text-[15px] text-gray-900">{comment.author}</h4>
-          <StarRating rating={comment.rating} size="small" />
+          {comment.rating && <StarRating rating={comment.rating} size="small" />}
         </div>
         <time className="text-[13px] text-gray-400 ml-auto">{formatDate(comment.createdAt)}</time>
       </div>

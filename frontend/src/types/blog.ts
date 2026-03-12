@@ -1,11 +1,10 @@
 export interface Author {
   name: string;
-  avatar: string;
+  avatar?: string;
 }
 
 export interface Blog {
-  id: string;
-  slug: string;
+  _id: string;
   title: string;
   excerpt: string;
   body: string;
@@ -13,22 +12,40 @@ export interface Blog {
   author: Author;
   category: string;
   date: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Comment {
-  id: string;
+  _id: string;
   blogId: string;
   author: string;
   comment: string;
-  rating: number;
+  date: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Rating {
-  id: string;
+  _id: string;
   blogId: string;
   author: string;
   rating: number;
   review: string;
+  date: string;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  count?: number;
+  data: T;
+}
+
+export interface RatingsResponse {
+  success: boolean;
+  count: number;
+  averageRating: number;
+  data: Rating[];
 }

@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import dynamic from 'next/dynamic';
+import moment from 'moment';
 import Layout from '@/components/Layout';
 import CommentCard from '@/components/CommentCard';
 import CommentSkeleton from '@/components/CommentSkeleton';
 import RelatedArticles from '@/components/RelatedArticles';
 import StarRating from '@/components/StarRating';
-import { Blog, Comment } from '@/types/blog';
-import { mockBlogs, mockComments } from '@/lib/mockData';
+import { Blog, Comment, Rating } from '@/types/blog';
+import { getAllBlogs, getBlogById, getCommentsByBlogId, getRatingsByBlogId, generateSlug } from '@/lib/api';
 
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
   ssr: false,
@@ -19,23 +20,35 @@ interface BlogPostProps {
   relatedArticles: Blog[];
 }
 
+// Combine comments and ratings into a single display format
+interface CombinedComment extends Comment {
+  rating?: number;
+}
+
 export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
   const [comments, setComments] = useState<Comment[]>([]);
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [averageRating, setAverageRating] = useState<number>(0);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(blog.body);
 
   useEffect(() => {
-    const fetchComments = async () => {
+    const fetchCommentsAndRatings = async () => {
       try {
         setIsLoadingComments(true);
         setCommentsError(null);
         
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // Fetch both comments and ratings in parallel
+        const [commentsData, ratingsData] = await Promise.all([
+          getCommentsByBlogId(blog._id),
+          getRatingsByBlogId(blog._id)
+        ]);
         
-        const blogComments = mockComments.filter(c => c.blogId === blog.id);
-        setComments(blogComments);
+        setComments(commentsData);
+        setRatings(ratingsData.data);
+        setAverageRating(ratingsData.averageRating || 0);
       } catch (error) {
         setCommentsError('Failed to load comments. Please try again later.');
         console.error('Error fetching comments:', error);
@@ -44,16 +57,11 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
       }
     };
 
-    fetchComments();
-  }, [blog.id]);
+    fetchCommentsAndRatings();
+  }, [blog._id]);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      day: 'numeric',
-      month: 'long', 
-      year: 'numeric' 
-    });
+    return moment(dateString).format('MMMM DD, YYYY');
   };
 
   const handleSaveEdit = (content: string) => {
@@ -83,9 +91,22 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
     });
   };
 
-  const averageRating = comments.length > 0
-    ? comments.reduce((sum, c) => sum + c.rating, 0) / comments.length
-    : 0;
+  // Combine comments and ratings for display
+  const combinedComments: CombinedComment[] = [
+    ...comments,
+    ...ratings.map(rating => ({
+      _id: rating._id,
+      blogId: rating.blogId,
+      author: rating.author,
+      comment: rating.review,
+      date: rating.date,
+      createdAt: rating.createdAt,
+      updatedAt: rating.updatedAt,
+      rating: rating.rating
+    }))
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const totalCount = comments.length + ratings.length;
 
   return (
     <Layout>
@@ -112,7 +133,7 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
             <div className="min-w-0">
               <div className="flex items-center gap-4 pb-8 border-b border-gray-200 mb-8">
                 <img 
-                  src={blog.author.avatar} 
+                  src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`} 
                   alt={blog.author.name}
                   className="w-12 h-12 rounded-full object-cover"
                 />
@@ -150,9 +171,9 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
               <section className="mt-12">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b-2 border-gray-200 gap-4">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {comments.length} Comment{comments.length !== 1 ? 's' : ''}
+                    {totalCount} {totalCount === 1 ? 'Review' : 'Reviews'}
                   </h2>
-                  {comments.length > 0 && (
+                  {averageRating > 0 && (
                     <div className="flex items-center gap-2">
                       <StarRating rating={Math.round(averageRating)} size="medium" />
                       <span className="text-lg font-semibold text-gray-900">
@@ -175,16 +196,16 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
                   </div>
                 )}
 
-                {!isLoadingComments && !commentsError && comments.length === 0 && (
+                {!isLoadingComments && !commentsError && combinedComments.length === 0 && (
                   <p className="py-12 text-center text-gray-400 italic">
-                    No comments yet. Be the first to comment!
+                    No reviews yet. Be the first to review!
                   </p>
                 )}
 
-                {!isLoadingComments && !commentsError && comments.length > 0 && (
+                {!isLoadingComments && !commentsError && combinedComments.length > 0 && (
                   <div className="flex flex-col gap-6">
-                    {comments.map((comment) => (
-                      <CommentCard key={comment.id} comment={comment} />
+                    {combinedComments.map((comment) => (
+                      <CommentCard key={comment._id} comment={comment} />
                     ))}
                   </div>
                 )}
@@ -194,34 +215,33 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
             <aside className="lg:sticky lg:top-24 h-fit">
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-8">
                 <h3 className="text-lg font-bold mb-6 text-gray-900">Top Guides</h3>
-                {relatedArticles.slice(0, 3).map((article) => (
-                  <a 
-                    key={article.id}
-                    href={`/blog/${article.slug}`}
-                    className="flex gap-4 py-4 border-b border-gray-200 last:border-b-0 transition-transform hover:translate-x-1"
-                  >
-                    <img 
-                      src={article.image} 
-                      alt={article.title}
-                      className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                    />
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-                        {article.category}
-                      </span>
-                      <h4 className="text-sm font-semibold leading-snug text-gray-900 line-clamp-2">
-                        {article.title}
-                      </h4>
-                      <time className="text-xs text-gray-400">
-                        {new Date(article.date).toLocaleDateString('en-US', { 
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric' 
-                        })}
-                      </time>
-                    </div>
-                  </a>
-                ))}
+                {relatedArticles.slice(0, 3).map((article) => {
+                  const articleSlug = generateSlug(article.title);
+                  return (
+                    <a 
+                      key={article._id}
+                      href={`/blog/${articleSlug}`}
+                      className="flex gap-4 py-4 border-b border-gray-200 last:border-b-0 transition-transform hover:translate-x-1"
+                    >
+                      <img 
+                        src={article.image} 
+                        alt={article.title}
+                        className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                      />
+                      <div className="flex flex-col gap-1 flex-1 min-w-0">
+                        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                          {article.category}
+                        </span>
+                        <h4 className="text-sm font-semibold leading-snug text-gray-900 line-clamp-2">
+                          {article.title}
+                        </h4>
+                        <time className="text-xs text-gray-400">
+                          {moment(article.date).format('MMMM DD, YYYY')}
+                        </time>
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             </aside>
           </div>
@@ -236,34 +256,55 @@ export default function BlogPost({ blog, relatedArticles }: BlogPostProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = mockBlogs.map((blog) => ({
-    params: { slug: blog.slug },
-  }));
+  try {
+    const blogs = await getAllBlogs();
+    const paths = blogs.map((blog) => ({
+      params: { slug: generateSlug(blog.title) },
+    }));
 
-  return {
-    paths,
-    fallback: false,
-  };
+    return {
+      paths,
+      fallback: 'blocking', // Generate pages on-demand if not pre-rendered
+    };
+  } catch (error) {
+    console.error('Error in getStaticPaths:', error);
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params?.slug as string;
-  const blog = mockBlogs.find((b) => b.slug === slug);
+  try {
+    const slug = params?.slug as string;
+    
+    // Fetch all blogs to find the one matching the slug
+    const blogs = await getAllBlogs();
+    const blog = blogs.find((b) => generateSlug(b.title) === slug);
 
-  if (!blog) {
+    if (!blog) {
+      return {
+        notFound: true,
+      };
+    }
+
+    // Get related articles from the same category
+    const relatedArticles = blogs
+      .filter((b) => b._id !== blog._id && b.category === blog.category)
+      .slice(0, 4);
+
+    return {
+      props: {
+        blog,
+        relatedArticles,
+      },
+      revalidate: 60, // Revalidate every 60 seconds
+    };
+  } catch (error) {
+    console.error('Error in getStaticProps:', error);
     return {
       notFound: true,
     };
   }
-
-  const relatedArticles = mockBlogs
-    .filter((b) => b.id !== blog.id && b.category === blog.category)
-    .slice(0, 4);
-
-  return {
-    props: {
-      blog,
-      relatedArticles,
-    },
-  };
 };
