@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Blog from '../models/Blog';
+import { generateSlug } from '../utils/common';
 
 export const createBlog = async (
   req: Request,
@@ -227,16 +228,6 @@ export const getTopGuides = async (
   }
 };
 
-// Helper function to generate slug from title
-const generateSlug = (title: string): string => {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9 -]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
-};
-
 export const getBlogBySlug = async (
   req: Request,
   res: Response,
@@ -245,11 +236,8 @@ export const getBlogBySlug = async (
   try {
     const { slug } = req.params;
 
-    // Get all blogs to find the one matching the slug
-    const allBlogs = await Blog.find().sort({ date: -1 });
-    
-    // Find the blog that matches the slug
-    const blog = allBlogs.find(b => generateSlug(b.title) === slug);
+    const allBlogs = await Blog.find();
+    const blog = await Blog.findOne({ slug });
 
     if (!blog) {
       res.status(404).json({

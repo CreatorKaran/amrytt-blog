@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { generateSlug } from '../utils/common';
 
 export interface IBlog extends Document {
   title: string;
+  slug: string;
   body: string;
   excerpt: string;
   image: string;
@@ -22,6 +24,14 @@ const BlogSchema: Schema = new Schema(
       required: [true, 'Title is required'],
       trim: true,
       maxlength: [200, 'Title cannot exceed 200 characters'],
+    },
+    slug: {
+      type: String,
+      required: [true, 'Slug is required'],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      maxlength: [200, 'Slug cannot exceed 200 characters'],
     },
     body: {
       type: String,
@@ -61,5 +71,13 @@ const BlogSchema: Schema = new Schema(
     timestamps: true,
   }
 );
+
+// Pre-save middleware to generate slug from title
+BlogSchema.pre('save', function(next) {
+  if (this.isModified('title') || this.isNew) {
+    this.slug = generateSlug(this.title as string);
+  }
+  next();
+});
 
 export default mongoose.model<IBlog>('Blog', BlogSchema);

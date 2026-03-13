@@ -1,4 +1,5 @@
 import Blog from '../models/Blog';
+import { generateSlug } from '../utils/common';
 import { seedBlogs } from './seedData';
 
 export const seedDatabase = async (): Promise<void> => {
@@ -10,7 +11,7 @@ export const seedDatabase = async (): Promise<void> => {
       console.log('📦 Database is empty. Seeding data...');
       
       // Insert seed data
-      await Blog.insertMany(seedBlogs);
+      await Blog.insertMany(seedBlogs.map((dt=> ({slug: generateSlug(dt?.title), ...dt,}))));
       
       console.log(`✅ Successfully seeded ${seedBlogs.length} blog posts`);
     } else {

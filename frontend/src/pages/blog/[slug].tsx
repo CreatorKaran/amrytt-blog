@@ -54,7 +54,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
         setCommentsError(null);
 
         // Fetch comments (now includes ratings)
-        const commentsData = await getCommentsByBlogId(blog._id);
+        const commentsData = await getCommentsByBlogId(blog?._id);
         setComments(commentsData);
       } catch (error) {
         setCommentsError('Failed to load comments. Please try again later.');
@@ -65,12 +65,12 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     };
 
     fetchCommentsAndRatings();
-  }, [blog._id]);
+  }, [blog?._id]);
 
   // Function to refresh comments after submission
   const refreshComments = async () => {
     try {
-      const commentsData = await getCommentsByBlogId(blog._id);
+      const commentsData = await getCommentsByBlogId(blog?._id);
       setComments(commentsData);
     } catch (error) {
       console.error('Error refreshing comments:', error);
@@ -81,7 +81,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
   const handleCommentUpdate = (updatedComment: Comment & { rating?: number }) => {
     setComments(prevComments =>
       prevComments.map(comment =>
-        comment._id === updatedComment._id ? updatedComment : comment
+        comment?._id === updatedComment?._id ? updatedComment : comment
       )
     );
     setEditingComment(null);
@@ -90,7 +90,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
   // Handle comment deletion
   const handleCommentDelete = (commentId: string) => {
     setComments(prevComments =>
-      prevComments.filter(comment => comment._id !== commentId)
+      prevComments.filter(comment => comment?._id !== commentId)
     );
   };
 
@@ -98,7 +98,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
   const handleEditComment = (comment: Comment) => {
     setEditingComment(comment);
     setNewComment({
-      name: comment.author,
+      name: comment?.author,
       email: comment.email,
       comment: comment.comment,
       rating: comment.rating || 5
@@ -124,7 +124,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     try {
       if (editingComment) {
         // Update existing comment
-        await updateComment(editingComment._id, {
+        await updateComment(editingComment?._id, {
           comment: newComment.comment.trim(),
           rating: newComment.rating
         });
@@ -132,7 +132,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
         // Update local state
         setComments(prevComments =>
           prevComments.map(comment =>
-            comment._id === editingComment._id
+            comment?._id === editingComment?._id
               ? { ...comment, comment: newComment.comment.trim(), rating: newComment.rating }
               : comment
           )
@@ -141,7 +141,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
         setEditingComment(null);
       } else {
         // Create new comment
-        await createComment(blog._id, {
+        await createComment(blog?._id, {
           author: newComment.name.trim(),
           email: newComment.email.trim(),
           comment: newComment.comment.trim(),
@@ -223,7 +223,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
 
             {/* Title */}
             <h1 className="text-[#10152e] text-2xl md:text-4xl lg:text-[48px] font-semibold leading-tight md:leading-[66px] tracking-[1px] text-center">
-              {blog.title}
+              {blog?.title}
             </h1>
           </div>
         </div>
@@ -231,8 +231,8 @@ export default function BlogPost({ blogData }: BlogPostProps) {
         {/* Hero Image */}
         <div className="relative h-[300px] md:h-[400px] lg:h-[560px] w-full overflow-hidden">
           <img
-            src={blog.image}
-            alt={blog.title}
+            src={blog?.image}
+            alt={blog?.title}
             className="absolute inset-0 w-full h-full object-cover"
           />
         </div>
@@ -246,28 +246,28 @@ export default function BlogPost({ blogData }: BlogPostProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-6 border-b border-[#e5e6ea] gap-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`}
-                    alt={blog.author.name}
+                    src={blog?.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog?.author.name)}&background=2563eb&color=fff`}
+                    alt={blog?.author.name}
                     className="w-8 h-8 rounded-full object-cover"
                   />
                   <span className="text-[#4e5265] text-base font-semibold tracking-[1px] uppercase">
-                    {blog.author.name}
+                    {blog?.author.name}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-[#4e5265] text-base font-semibold tracking-[1px] uppercase whitespace-nowrap">
-                  <span>{moment(blog.date).format('DD MMMM')}</span>
-                  <span>{moment(blog.date).format('YYYY')}</span>
+                  <span>{moment(blog?.date).format('DD MMMM')}</span>
+                  <span>{moment(blog?.date).format('YYYY')}</span>
                 </div>
               </div>
 
               {/* Article Excerpt */}
               <p className="text-[#10152e] text-base leading-6 tracking-[1px] w-full">
-                {blog.excerpt}
+                {blog?.excerpt}
               </p>
 
               {/* Article Body */}
               <div className="text-[#10152e] text-base leading-6 tracking-[1px] space-y-6">
-                <MarkdownRenderer content={blog.body} />
+                <MarkdownRenderer content={blog?.body} />
               </div>
 
               {/* Author Section */}
@@ -275,16 +275,16 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                 <div className="border-t border-[#e5e6ea] pt-6 h-[296px] px-6">
                   <div className="flex justify-center items-center gap-2 mb-3">
                     <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">About</span>
-                    <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">{blog.author.name}</span>
+                    <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">{blog?.author.name}</span>
                   </div>
                   <div className="flex flex-col items-center gap-3">
                     <img
-                      src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`}
-                      alt={blog.author.name}
+                      src={blog?.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog?.author.name)}&background=2563eb&color=fff`}
+                      alt={blog?.author.name}
                       className="w-[100px] h-[100px] rounded-full object-cover"
                     />
                     <p className="text-[#4e5265] text-base italic font-semibold leading-6 tracking-[1px] text-justify">
-                      With over a decade in fitness, {blog.author.name} specializes in strength training. Certified by NASM, he designs challenging yet achievable workout programs. His passion is helping clients build strength and confidence through personalized routines. Outside the gym, {blog.author.name} enjoys running and outdoor adventures.
+                      With over a decade in fitness, {blog?.author.name} specializes in strength training. Certified by NASM, he designs challenging yet achievable workout programs. His passion is helping clients build strength and confidence through personalized routines. Outside the gym, {blog?.author.name} enjoys running and outdoor adventures.
                     </p>
                   </div>
                 </div>
@@ -305,27 +305,27 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                     <div className="flex gap-4 pb-2 w-full">
                       {exploreMore?.length > 0 && (() => {
                         const article = exploreMore[currentExploreIndex];
-                        const slug = generateSlug(article.title);
+                        const slug = generateSlug(article?.title);
                         return (
-                          <Link href={`/blog/${slug}`} key={article._id} className="hover:shadow-2xl flex flex-col gap-4 lg:gap-6 w-full">
+                          <Link href={`/blog/${slug}`} key={article?._id} className="hover:shadow-2xl flex flex-col gap-4 lg:gap-6 w-full">
                             <div className="flex flex-col gap-4 lg:gap-6 w-full">
                               <img
-                                src={article.image}
-                                alt={article.title}
+                                src={article?.image}
+                                alt={article?.title}
                                 className="w-full h-[165px] object-cover"
                               />
                               <div className="flex flex-col gap-3 lg:gap-4 w-full px-1">
                                 <div className="flex items-center gap-2">
                                   <span className="text-black text-sm font-medium tracking-[1px]">
-                                    {article.category}
+                                    {article?.category}
                                   </span>
                                   <div className="w-0 h-4 border-l-2 border-gray-300"></div>
                                   <span className="text-[#757575] text-sm tracking-[1px] whitespace-nowrap">
-                                    {moment(article.date).format('DD MMM YYYY')}
+                                    {moment(article?.date).format('DD MMM YYYY')}
                                   </span>
                                 </div>
                                 <p className="text-black text-base leading-6 tracking-[1px] w-full">
-                                  {article.title}
+                                  {article?.title}
                                 </p>
                               </div>
                             </div>
@@ -374,17 +374,17 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 lg:gap-6 w-full">
                     {tourGuides?.slice(0, 3).map((guide, index) => (
-                      <div key={guide._id} className="flex flex-col gap-4 lg:gap-6 w-full">
+                      <div key={guide?._id} className="flex flex-col gap-4 lg:gap-6 w-full">
                         <div className="flex flex-col gap-3 lg:gap-4 w-full">
                           <div className="flex items-start gap-4 w-full">
                             <img
-                              src={guide.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide.author.name)}&background=2563eb&color=fff`}
-                              alt={guide.author.name}
+                              src={guide?.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide?.author.name)}&background=2563eb&color=fff`}
+                              alt={guide?.author.name}
                               className="w-[60px] h-[60px] rounded-full object-cover shrink-0"
                             />
                             <div className="flex flex-col gap-1 flex-1 min-w-0">
                               <h4 className="text-black text-base leading-7 tracking-[1px]">
-                                {guide.author.name}
+                                {guide?.author.name}
                               </h4>
                               <div className="flex items-center gap-2">
                                 <svg className="w-5 h-5 text-black shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -423,17 +423,17 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 lg:gap-6 w-full">
                     {tourGuides?.slice(0, 3).map((guide, index) => (
-                      <div key={guide._id} className="flex flex-col gap-4 lg:gap-6 w-full">
+                      <div key={guide?._id} className="flex flex-col gap-4 lg:gap-6 w-full">
                         <div className="flex flex-col gap-3 lg:gap-4 w-full">
                           <div className="flex items-start gap-4 w-full">
                             <img
-                              src={guide.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide.author.name)}&background=2563eb&color=fff`}
-                              alt={guide.author.name}
+                              src={guide?.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide?.author.name)}&background=2563eb&color=fff`}
+                              alt={guide?.author.name}
                               className="w-[60px] h-[60px] rounded-full object-cover shrink-0"
                             />
                             <div className="flex flex-col gap-1 flex-1 min-w-0">
                               <h4 className="text-black text-base leading-7 tracking-[1px]">
-                                {guide.author.name}
+                                {guide?.author.name}
                               </h4>
                               <div className="flex items-center gap-2">
                                 <svg className="w-5 h-5 text-black shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -464,16 +464,16 @@ export default function BlogPost({ blogData }: BlogPostProps) {
             <div className="border-t border-[#e5e6ea] pt-6 h-[296px] px-6">
               <div className="flex items-start justify-center gap-2 mb-3">
                 <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">About</span>
-                <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">{blog.author.name}</span>
+                <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">{blog?.author.name}</span>
               </div>
               <div className="flex flex-col items-center gap-3">
                 <img
-                  src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`}
-                  alt={blog.author.name}
+                  src={blog?.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog?.author.name)}&background=2563eb&color=fff`}
+                  alt={blog?.author.name}
                   className="w-[100px] h-[100px] rounded-full object-cover"
                 />
                 <p className="text-[#4e5265] text-base italic font-semibold leading-6 tracking-[1px] text-justify">
-                  With over a decade in fitness, {blog.author.name} specializes in strength training. Certified by NASM, he designs challenging yet achievable workout programs. His passion is helping clients build strength and confidence through personalized routines. Outside the gym, {blog.author.name} enjoys running and outdoor adventures.
+                  With over a decade in fitness, {blog?.author.name} specializes in strength training. Certified by NASM, he designs challenging yet achievable workout programs. His passion is helping clients build strength and confidence through personalized routines. Outside the gym, {blog?.author.name} enjoys running and outdoor adventures.
                 </p>
               </div>
             </div>
@@ -497,7 +497,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
               <div className="flex flex-col gap-6 mt-8 w-full">
                 {combinedComments.map((comment) => (
                   <CommentCard
-                    key={comment._id}
+                    key={comment?._id}
                     comment={comment}
                     onCommentUpdate={handleCommentUpdate}
                     onCommentDelete={handleCommentDelete}
@@ -682,7 +682,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const blogs = await getAllBlogs();
     const paths = blogs.map((blog) => ({
-      params: { slug: generateSlug(blog.title) },
+      params: { slug: generateSlug(blog?.title) },
     }));
 
     return {

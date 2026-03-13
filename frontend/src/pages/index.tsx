@@ -35,27 +35,27 @@ export default function Home({ blogs }: HomeProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogs?.map((article) => {
-            const slug = generateSlug(article.title);
+            const slug = generateSlug(article?.title);
             return (
-              <Link href={`/blog/${slug}`} key={article._id} className="flex flex-col gap-3 w-full hover:shadow-2xl">
+              <Link href={`/blog/${slug}`} key={article?._id} className="flex flex-col gap-3 w-full hover:shadow-2xl">
                 <div className="relative w-full">
                   <img
-                    src={article.image}
-                    alt={article.title}
+                    src={article?.image}
+                    alt={article?.title}
                     className="w-full h-[240px] object-cover"
                   />
                 </div>
-                <h3 title={article.title} className="text-[#10152e] text-xl font-semibold leading-[30px] tracking-[1px] capitalize px-1 line-clamp-2">
-                  {article.title}
+                <h3 title={article?.title} className="text-[#10152e] text-xl font-semibold leading-[30px] tracking-[1px] capitalize px-1 line-clamp-2">
+                  {article?.title}
                 </h3>
                 <div className="flex flex-col items-center justify-center px-1">
                   <p className="text-[#4e5265] text-base leading-6 tracking-[1px] line-clamp-3">
-                    {article.excerpt}
+                    {article?.excerpt}
                   </p>
                 </div>
                 <div className="flex items-start gap-1 text-black text-sm font-medium leading-5 tracking-[1px] text-center px-1">
                   <span>By</span>
-                  <span>{article.author.name}</span>
+                  <span>{article?.author.name}</span>
                 </div>
               </Link>
             )

@@ -43,8 +43,8 @@ export default function CommentCard({ comment, onCommentUpdate, onCommentDelete,
 
     setIsDeleting(true);
     try {
-      await deleteComment(comment._id);
-      onCommentDelete?.(comment._id);
+      await deleteComment(comment?._id);
+      onCommentDelete?.(comment?._id);
     } catch (error) {
       console.error('Error deleting comment:', error);
       alert('Failed to delete comment. Please try again.');
@@ -54,18 +54,18 @@ export default function CommentCard({ comment, onCommentUpdate, onCommentDelete,
   };
 
   return (
-    <div key={comment._id} className="w-full" title='Click to Edit' onClick={handleEdit}>
+    <div key={comment?._id} className="w-full" title='Click to Edit' onClick={handleEdit}>
       <div className="flex gap-5 items-center lg:items-start w-full">
         <img
-          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author)}&background=2563eb&color=fff`}
-          alt={comment.author}
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment?.author)}&background=2563eb&color=fff`}
+          alt={comment?.author}
           className="w-[60px] h-[60px] rounded-full object-cover shrink-0"
         />
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-2.5 lg:gap-0">
             <div className="flex flex-col lg:flex-row lg:items-center gap-2.5 lg:gap-3 flex-1 min-w-0">
               <span className="text-black text-base leading-5 tracking-[1px]">
-                {comment.author}
+                {comment?.author}
               </span>
               {comment.rating && (
                 <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export default function CommentCard({ comment, onCommentUpdate, onCommentDelete,
               )}
             </div>
             <span className="text-[#757575] text-sm leading-normal tracking-[1px] whitespace-nowrap">
-              {moment(comment.date).format('DD MMM YYYY')}
+              {moment(comment?.date).format('DD MMM YYYY')}
             </span>
           </div>
           <p className="text-[#10152e] text-base leading-6 tracking-[1px] opacity-80 w-full">

@@ -36,8 +36,7 @@ const DEFAULT_CONFIG = {
 
 // Helper function to generate slug
 function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
+  return title?.toLowerCase()
     .replace(/[^a-z0-9 -]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
@@ -136,15 +135,15 @@ export function generateHomeMetadata({ blogs }: HomeMetadataProps) {
         "position": index + 1,
         "item": {
           "@type": "BlogPosting",
-          "headline": blog.title,
-          "description": blog.excerpt,
-          "url": `${url}/blog/${generateSlug(blog.title)}`,
-          "datePublished": blog.date,
+          "headline": blog?.title,
+          "description": blog?.excerpt,
+          "url": `${url}/blog/${generateSlug(blog?.title)}`,
+          "datePublished": blog?.date,
           "author": {
             "@type": "Person",
-            "name": blog.author.name
+            "name": blog?.author.name
           },
-          "image": blog.image
+          "image": blog?.image
         }
       }))
     }
@@ -163,9 +162,9 @@ export function generateHomeMetadata({ blogs }: HomeMetadataProps) {
 }
 
 export function generateBlogMetadata({ blog, comments = [] }: BlogMetadataProps) {
-  const url = `${DEFAULT_CONFIG.siteUrl}/blog/${generateSlug(blog.title)}`;
-  const title = `${blog.title} | ${DEFAULT_CONFIG.siteName}`;
-  const description = blog.excerpt || `Read ${blog.title} - Expert fitness advice and tips from ${blog.author.name}`;
+  const url = `${DEFAULT_CONFIG.siteUrl}/blog/${generateSlug(blog?.title)}`;
+  const title = `${blog?.title} | ${DEFAULT_CONFIG.siteName}`;
+  const description = blog?.excerpt || `Read ${blog?.title} - Expert fitness advice and tips from ${blog?.author.name}`;
   
   // Calculate average rating from comments that have ratings
   const commentsWithRatings = comments.filter((comment: any) => comment.rating);
@@ -179,16 +178,16 @@ export function generateBlogMetadata({ blog, comments = [] }: BlogMetadataProps)
     {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
-      "headline": blog.title,
+      "headline": blog?.title,
       "description": description,
-      "image": blog.image,
+      "image": blog?.image,
       "url": url,
-      "datePublished": blog.date,
-      "dateModified": blog.updatedAt || blog.date,
+      "datePublished": blog?.date,
+      "dateModified": blog?.updatedAt || blog?.date,
       "author": {
         "@type": "Person",
-        "name": blog.author.name,
-        "image": blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`
+        "name": blog?.author.name,
+        "image": blog?.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog?.author.name)}&background=2563eb&color=fff`
       },
       "publisher": {
         "@type": "Organization",
@@ -203,8 +202,8 @@ export function generateBlogMetadata({ blog, comments = [] }: BlogMetadataProps)
         "@type": "WebPage",
         "@id": url
       },
-      "articleSection": blog.category,
-      "wordCount": blog.body ? blog.body.split(' ').length : 0,
+      "articleSection": blog?.category,
+      "wordCount": blog?.body ? blog?.body.split(' ').length : 0,
       ...(averageRating > 0 && {
         "aggregateRating": {
           "@type": "AggregateRating",
@@ -234,7 +233,7 @@ export function generateBlogMetadata({ blog, comments = [] }: BlogMetadataProps)
         {
           "@type": "ListItem",
           "position": 3,
-          "name": blog.title,
+          "name": blog?.title,
           "item": url
         }
       ]
@@ -247,15 +246,15 @@ export function generateBlogMetadata({ blog, comments = [] }: BlogMetadataProps)
       "@type": "FAQPage",
       "mainEntity": sortedComments.slice(0, 5).map((comment: any) => ({
         "@type": "Question",
-        "name": `Comment by ${comment.author}`,
+        "name": `Comment by ${comment?.author}`,
         "acceptedAnswer": {
           "@type": "Answer",
           "text": comment.comment,
           "author": {
             "@type": "Person",
-            "name": comment.author
+            "name": comment?.author
           },
-          "dateCreated": comment.date
+          "dateCreated": comment?.date
         }
       }))
     };
@@ -265,15 +264,15 @@ export function generateBlogMetadata({ blog, comments = [] }: BlogMetadataProps)
   return generateMetadata({
     title,
     description,
-    keywords: `${blog.category}, fitness, workout, ${blog.author.name}, health, wellness`,
-    author: blog.author.name,
+    keywords: `${blog?.category}, fitness, workout, ${blog?.author.name}, health, wellness`,
+    author: blog?.author.name,
     url,
-    image: blog.image,
+    image: blog?.image,
     type: 'article',
-    publishedTime: blog.date,
-    modifiedTime: blog.updatedAt || blog.date,
-    section: blog.category,
-    twitterCreator: `@${blog.author.name.replace(/\s+/g, '').toLowerCase()}`,
+    publishedTime: blog?.date,
+    modifiedTime: blog?.updatedAt || blog?.date,
+    section: blog?.category,
+    twitterCreator: `@${blog?.author.name.replace(/\s+/g, '')?.toLowerCase()}`,
     structuredData
   });
 }
