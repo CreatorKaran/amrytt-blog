@@ -4,6 +4,7 @@ export interface IComment extends Document {
   blogId: mongoose.Types.ObjectId;
   author: string;
   comment: string;
+  rating?: number;
   date: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -26,6 +27,12 @@ const CommentSchema: Schema = new Schema(
       type: String,
       required: [true, 'Comment is required'],
       maxlength: [1000, 'Comment cannot exceed 1000 characters'],
+    },
+    rating: {
+      type: Number,
+      min: [1, 'Rating must be at least 1'],
+      max: [5, 'Rating cannot exceed 5'],
+      default: null,
     },
     date: {
       type: Date,

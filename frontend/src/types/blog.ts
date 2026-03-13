@@ -22,17 +22,7 @@ export interface Comment {
   blogId: string;
   author: string;
   comment: string;
-  date: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Rating {
-  _id: string;
-  blogId: string;
-  author: string;
-  rating: number;
-  review: string;
+  rating?: number;
   date: string;
   createdAt: string;
   updatedAt: string;
@@ -42,11 +32,4 @@ export interface ApiResponse<T> {
   success: boolean;
   count?: number;
   data: T;
-}
-
-export interface RatingsResponse {
-  success: boolean;
-  count: number;
-  averageRating: number;
-  data: Rating[];
 }

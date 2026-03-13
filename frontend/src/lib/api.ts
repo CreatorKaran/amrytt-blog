@@ -1,4 +1,4 @@
-import { Blog, Comment, Rating, ApiResponse, RatingsResponse } from '@/types/blog';
+import { Blog, Comment, ApiResponse } from '@/types/blog';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5100/api';
 
@@ -112,7 +112,7 @@ export async function getCommentsByBlogId(blogId: string): Promise<Comment[]> {
   return result.data;
 }
 
-export async function createComment(blogId: string, commentData: { author: string; comment: string }): Promise<Comment> {
+export async function createComment(blogId: string, commentData: { author: string; comment: string; rating?: number }): Promise<Comment> {
   const response = await fetch(`${API_BASE_URL}/comments/blog/${blogId}`, {
     method: 'POST',
     headers: {
@@ -126,39 +126,6 @@ export async function createComment(blogId: string, commentData: { author: strin
 
 export async function deleteComment(id: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/comments/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  await handleResponse<ApiResponse<null>>(response);
-}
-
-// Rating API functions
-export async function getRatingsByBlogId(blogId: string): Promise<RatingsResponse> {
-  const response = await fetch(`${API_BASE_URL}/ratings/blog/${blogId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  return handleResponse<RatingsResponse>(response);
-}
-
-export async function createRating(blogId: string, ratingData: { author: string; rating: number; review: string }): Promise<Rating> {
-  const response = await fetch(`${API_BASE_URL}/ratings/blog/${blogId}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(ratingData),
-  });
-  const result = await handleResponse<ApiResponse<Rating>>(response);
-  return result.data;
-}
-
-export async function deleteRating(id: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/ratings/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',

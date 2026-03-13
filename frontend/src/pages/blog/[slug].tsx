@@ -2,16 +2,14 @@ import { useState, useEffect } from 'react';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import moment from 'moment';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import { Blog, Comment, Rating } from '@/types/blog';
+import { Blog, Comment } from '@/types/blog';
 import {
   getAllBlogs,
   getCommentsByBlogId,
-  getRatingsByBlogId,
   generateSlug,
   getBlogBySlug,
   BlogBySlugResponse,
-  createComment,
-  createRating
+  createComment
 } from '@/lib/api';
 import { generateBlogMetadata } from '@/lib/metadata';
 import Link from 'next/link';
@@ -25,9 +23,7 @@ interface BlogPostProps {
 }
 
 // Combine comments and ratings into a single display format
-interface CombinedComment extends Comment {
-  rating?: number;
-}
+interface CombinedComment extends Comment {}
 
 // Star Rating Component for Comments
 function CommentStarRating({ rating }: { rating: number }) {
@@ -107,7 +103,6 @@ function InteractiveStarRating({ rating, onRatingChange }: { rating: number; onR
 export default function BlogPost({ blogData }: BlogPostProps) {
   const { blog, relatedArticles, exploreMore, tourGuides, navigation } = blogData;
   const [comments, setComments] = useState<Comment[]>([]);
-  const [ratings, setRatings] = useState<Rating[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [newComment, setNewComment] = useState({
@@ -126,14 +121,9 @@ export default function BlogPost({ blogData }: BlogPostProps) {
         setIsLoadingComments(true);
         setCommentsError(null);
 
-        // Fetch both comments and ratings in parallel
-        const [commentsData, ratingsData] = await Promise.all([
-          getCommentsByBlogId(blog._id),
-          getRatingsByBlogId(blog._id)
-        ]);
-
+        // Fetch comments (now includes ratings)
+        const commentsData = await getCommentsByBlogId(blog._id);
         setComments(commentsData);
-        setRatings(ratingsData.data);
       } catch (error) {
         setCommentsError('Failed to load comments. Please try again later.');
         console.error('Error fetching comments:', error);
@@ -148,12 +138,8 @@ export default function BlogPost({ blogData }: BlogPostProps) {
   // Function to refresh comments after submission
   const refreshComments = async () => {
     try {
-      const [commentsData, ratingsData] = await Promise.all([
-        getCommentsByBlogId(blog._id),
-        getRatingsByBlogId(blog._id)
-      ]);
+      const commentsData = await getCommentsByBlogId(blog._id);
       setComments(commentsData);
-      setRatings(ratingsData.data);
     } catch (error) {
       console.error('Error refreshing comments:', error);
     }
@@ -171,18 +157,12 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     setSubmitSuccess(false);
 
     try {
-      // Submit both comment and rating
-      await Promise.all([
-        createComment(blog._id, {
-          author: newComment.name.trim(),
-          comment: newComment.comment.trim()
-        }),
-        createRating(blog._id, {
-          author: newComment.name.trim(),
-          rating: newComment.rating,
-          review: newComment.comment.trim()
-        })
-      ]);
+      // Submit comment with rating
+      await createComment(blog._id, {
+        author: newComment.name.trim(),
+        comment: newComment.comment.trim(),
+        rating: newComment.rating
+      });
 
       // Reset form
       setNewComment({
@@ -206,23 +186,12 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     }
   };
   // Combine comments and ratings for display
-  const combinedComments: CombinedComment[] = [
-    ...comments,
-    ...ratings.map(rating => ({
-      _id: rating._id,
-      blogId: rating.blogId,
-      author: rating.author,
-      comment: rating.review,
-      date: rating.date,
-      createdAt: rating.createdAt,
-      updatedAt: rating.updatedAt,
-      rating: rating.rating
-    }))
-  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const combinedComments: CombinedComment[] = comments
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <>
-      {generateBlogMetadata({ blog, comments, ratings })}
+      {generateBlogMetadata({ blog, comments })}
       
       <div className="bg-[#fafafa] min-h-screen">
       {/* Page Header */}

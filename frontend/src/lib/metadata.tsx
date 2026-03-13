@@ -19,7 +19,6 @@ export interface MetadataConfig {
 export interface BlogMetadataProps {
   blog: Blog;
   comments?: any[];
-  ratings?: any[];
 }
 
 export interface HomeMetadataProps {
@@ -163,25 +162,18 @@ export function generateHomeMetadata({ blogs }: HomeMetadataProps) {
   });
 }
 
-export function generateBlogMetadata({ blog, comments = [], ratings = [] }: BlogMetadataProps) {
+export function generateBlogMetadata({ blog, comments = [] }: BlogMetadataProps) {
   const url = `${DEFAULT_CONFIG.siteUrl}/blog/${generateSlug(blog.title)}`;
   const title = `${blog.title} | ${DEFAULT_CONFIG.siteName}`;
   const description = blog.excerpt || `Read ${blog.title} - Expert fitness advice and tips from ${blog.author.name}`;
   
-  const averageRating = ratings.length > 0 
-    ? ratings.reduce((sum: number, rating: any) => sum + rating.rating, 0) / ratings.length 
+  // Calculate average rating from comments that have ratings
+  const commentsWithRatings = comments.filter((comment: any) => comment.rating);
+  const averageRating = commentsWithRatings.length > 0 
+    ? commentsWithRatings.reduce((sum: number, comment: any) => sum + comment.rating, 0) / commentsWithRatings.length 
     : 0;
 
-  const combinedComments = [
-    ...comments,
-    ...ratings.map((rating: any) => ({
-      _id: rating._id,
-      author: rating.author,
-      comment: rating.review,
-      date: rating.date,
-      createdAt: rating.createdAt
-    }))
-  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const sortedComments = comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const structuredData: any[] = [
     {
@@ -217,7 +209,7 @@ export function generateBlogMetadata({ blog, comments = [], ratings = [] }: Blog
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": averageRating.toFixed(1),
-          "reviewCount": ratings.length,
+          "reviewCount": commentsWithRatings.length,
           "bestRating": "5",
           "worstRating": "1"
         }
@@ -249,11 +241,11 @@ export function generateBlogMetadata({ blog, comments = [], ratings = [] }: Blog
     }
   ];
 
-  if (combinedComments.length > 0) {
+  if (sortedComments.length > 0) {
     const faqSchema = {
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      "mainEntity": combinedComments.slice(0, 5).map((comment: any) => ({
+      "mainEntity": sortedComments.slice(0, 5).map((comment: any) => ({
         "@type": "Question",
         "name": `Comment by ${comment.author}`,
         "acceptedAnswer": {

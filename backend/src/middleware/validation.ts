@@ -67,7 +67,7 @@ export const blogSchema = Joi.object({
   query: Joi.object().optional(),
 });
 
-// Comment validation schema
+// Comment validation schema (now includes optional rating)
 export const commentSchema = Joi.object({
   body: Joi.object({
     author: Joi.string().trim().max(100).required().messages({
@@ -80,29 +80,10 @@ export const commentSchema = Joi.object({
       'string.max': 'Comment cannot exceed 1000 characters',
       'any.required': 'Comment is required',
     }),
-  }).required(),
-  params: Joi.object().optional(),
-  query: Joi.object().optional(),
-});
-
-// Rating validation schema
-export const ratingSchema = Joi.object({
-  body: Joi.object({
-    author: Joi.string().trim().max(100).required().messages({
-      'string.empty': 'Author is required',
-      'string.max': 'Author name cannot exceed 100 characters',
-      'any.required': 'Author is required',
-    }),
-    rating: Joi.number().integer().min(1).max(5).required().messages({
+    rating: Joi.number().integer().min(1).max(5).optional().messages({
       'number.base': 'Rating must be a number',
       'number.min': 'Rating must be between 1 and 5',
       'number.max': 'Rating must be between 1 and 5',
-      'any.required': 'Rating is required',
-    }),
-    review: Joi.string().trim().max(500).required().messages({
-      'string.empty': 'Review is required',
-      'string.max': 'Review cannot exceed 500 characters',
-      'any.required': 'Review is required',
     }),
   }).required(),
   params: Joi.object().optional(),
@@ -135,7 +116,7 @@ export const blogIdSchema = Joi.object({
   query: Joi.object().optional(),
 });
 
-// Combined validation for routes with both blogId param and body
+// Combined validation for routes with both blogId param and comment body (now includes optional rating)
 export const blogIdWithCommentSchema = Joi.object({
   body: Joi.object({
     author: Joi.string().trim().max(100).required().messages({
@@ -148,34 +129,10 @@ export const blogIdWithCommentSchema = Joi.object({
       'string.max': 'Comment cannot exceed 1000 characters',
       'any.required': 'Comment is required',
     }),
-  }).required(),
-  params: Joi.object({
-    blogId: Joi.string().hex().length(24).required().messages({
-      'string.hex': 'Invalid blog ID format',
-      'string.length': 'Invalid blog ID format',
-      'any.required': 'Blog ID is required',
-    }),
-  }).required(),
-  query: Joi.object().optional(),
-});
-
-export const blogIdWithRatingSchema = Joi.object({
-  body: Joi.object({
-    author: Joi.string().trim().max(100).required().messages({
-      'string.empty': 'Author is required',
-      'string.max': 'Author name cannot exceed 100 characters',
-      'any.required': 'Author is required',
-    }),
-    rating: Joi.number().integer().min(1).max(5).required().messages({
+    rating: Joi.number().integer().min(1).max(5).optional().messages({
       'number.base': 'Rating must be a number',
       'number.min': 'Rating must be between 1 and 5',
       'number.max': 'Rating must be between 1 and 5',
-      'any.required': 'Rating is required',
-    }),
-    review: Joi.string().trim().max(500).required().messages({
-      'string.empty': 'Review is required',
-      'string.max': 'Review cannot exceed 500 characters',
-      'any.required': 'Review is required',
     }),
   }).required(),
   params: Joi.object({

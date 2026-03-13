@@ -30,6 +30,11 @@ const router = Router();
  *         comment:
  *           type: string
  *           maxLength: 1000
+ *         rating:
+ *           type: number
+ *           minimum: 1
+ *           maximum: 5
+ *           description: Optional rating (1-5 stars)
  *         date:
  *           type: string
  *           format: date-time
@@ -44,6 +49,7 @@ const router = Router();
  *         blogId: 507f1f77bcf86cd799439011
  *         author: John Doe
  *         comment: Great article!
+ *         rating: 5
  *         date: 2024-01-15T10:30:00.000Z
  */
 
@@ -74,6 +80,11 @@ const router = Router();
  *                 type: string
  *               comment:
  *                 type: string
+ *               rating:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 5
+ *                 description: Optional rating (1-5 stars)
  *     responses:
  *       201:
  *         description: Comment created successfully

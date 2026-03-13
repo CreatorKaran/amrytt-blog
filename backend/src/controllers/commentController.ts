@@ -8,7 +8,7 @@ export const createComment = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { author, comment } = req.body;
+    const { author, comment, rating } = req.body;
     const blogId = req.params.blogId;
 
     const blog = await Blog.findById(blogId);
@@ -24,6 +24,7 @@ export const createComment = async (
       blogId,
       author,
       comment,
+      rating: rating || null,
     });
 
     res.status(201).json({
