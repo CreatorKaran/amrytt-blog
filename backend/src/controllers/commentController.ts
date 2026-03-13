@@ -78,3 +78,39 @@ export const deleteComment = async (
     next(error);
   }
 };
+export const updateComment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { author, comment, rating } = req.body;
+    const commentId = req.params.id;
+
+    const updatedComment = await Comment.findByIdAndUpdate(
+      commentId,
+      {
+        author,
+        comment,
+        rating: rating || null,
+      },
+      { new: true }
+    );
+
+    if (!updatedComment) {
+      res.status(404).json({
+        success: false,
+        error: 'Comment not found',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: updatedComment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

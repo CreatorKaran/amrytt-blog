@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   createComment,
   getCommentsByBlogId,
+  updateComment,
   deleteComment,
 } from '../controllers/commentController';
 import { validate, blogIdWithCommentSchema, blogIdSchema, idSchema } from '../middleware/validation';
@@ -123,6 +124,45 @@ router.post('/blog/:blogId', validate(blogIdWithCommentSchema), createComment);
  *                     $ref: '#/components/schemas/Comment'
  */
 router.get('/blog/:blogId', validate(blogIdSchema), getCommentsByBlogId);
+
+/**
+ * @swagger
+ * /api/comments/{id}:
+ *   put:
+ *     summary: Update a comment
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - author
+ *               - comment
+ *             properties:
+ *               author:
+ *                 type: string
+ *               comment:
+ *                 type: string
+ *               rating:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 5
+ *                 description: Optional rating (1-5 stars)
+ *     responses:
+ *       200:
+ *         description: Comment updated successfully
+ *       404:
+ *         description: Comment not found
+ */
+router.put('/:id', validate(blogIdWithCommentSchema), updateComment);
 
 /**
  * @swagger

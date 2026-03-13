@@ -17,7 +17,7 @@ import RelatedArticles from '@/components/RelatedArticles';
 import ExploreMore from '@/components/ExploreMore';
 import Navigation from '@/components/Navigation';
 import CommentSkeleton from '@/components/CommentSkeleton';
-import GoodIcon from '@/components/icons/Good';
+import CommentCard from '@/components/CommentCard';
 import InteractiveStarRating from '@/components/InteractiveStarRating';
 import MessageIcon from '@/components/icons/Message';
 
@@ -92,6 +92,22 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     } catch (error) {
       console.error('Error refreshing comments:', error);
     }
+  };
+
+  // Handle comment update
+  const handleCommentUpdate = (updatedComment: Comment & { rating?: number }) => {
+    setComments(prevComments => 
+      prevComments.map(comment => 
+        comment._id === updatedComment._id ? updatedComment : comment
+      )
+    );
+  };
+
+  // Handle comment deletion
+  const handleCommentDelete = (commentId: string) => {
+    setComments(prevComments => 
+      prevComments.filter(comment => comment._id !== commentId)
+    );
   };
 
   // Handle form submission
@@ -289,43 +305,14 @@ export default function BlogPost({ blogData }: BlogPostProps) {
 
             {/* Display Comments */}
             {!isLoadingComments && !commentsError && combinedComments.length > 0 && (
-              <div className="flex flex-col gap-8 mt-8 w-full">
-                {combinedComments.slice(0, 2).map((comment, index) => (
-                  <div key={comment._id} className="w-full">
-                    <div className="flex gap-5 items-start w-full">
-                      <img
-                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author)}&background=2563eb&color=fff`}
-                        alt={comment.author}
-                        className="w-[60px] h-[60px] rounded-full object-cover shrink-0"
-                      />
-                      <div className="flex-1 flex flex-col gap-3 min-w-0">
-                        <div className="flex items-start justify-between w-full">
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className="text-black text-base leading-5 tracking-[1px]">
-                              {comment.author}
-                            </span>
-                            {comment.rating && (
-                              <div className="flex items-center gap-3">
-                                <CommentStarRating rating={comment.rating} />
-                                <span className="text-[#121212] text-[15px] leading-normal tracking-[0.5px]">
-                                  ({comment.rating}.0)
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <span className="text-[#757575] text-sm leading-normal tracking-[1px] whitespace-nowrap">
-                            {moment(comment.date).format('DD MMM YYYY')}
-                          </span>
-                        </div>
-                        <p className="text-[#10152e] text-base leading-6 tracking-[1px] opacity-80 w-full">
-                          {comment.comment}
-                        </p>
-                      </div>
-                    </div>
-                    {index < combinedComments.slice(0, 2).length - 1 && (
-                      <div className="w-full h-px bg-gray-200 mt-8"></div>
-                    )}
-                  </div>
+              <div className="flex flex-col gap-6 mt-8 w-full">
+                {combinedComments.map((comment) => (
+                  <CommentCard
+                    key={comment._id}
+                    comment={comment}
+                    onCommentUpdate={handleCommentUpdate}
+                    onCommentDelete={handleCommentDelete}
+                  />
                 ))}
               </div>
             )}

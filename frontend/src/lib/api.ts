@@ -124,6 +124,18 @@ export async function createComment(blogId: string, commentData: { author: strin
   return result.data;
 }
 
+export async function updateComment(id: string, commentData: { author: string; comment: string; rating?: number }): Promise<Comment> {
+  const response = await fetch(`${API_BASE_URL}/comments/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(commentData),
+  });
+  const result = await handleResponse<ApiResponse<Comment>>(response);
+  return result.data;
+}
+
 export async function deleteComment(id: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/comments/${id}`, {
     method: 'DELETE',
