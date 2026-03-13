@@ -17,7 +17,7 @@ export default function ExploreMore({ articles }: ExploreMoreProps) {
       <h3 className="text-[#10152e] text-xl font-semibold leading-7 tracking-[1px]">
         Explore more
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 lg:gap-10 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-6 lg:gap-10 w-full">
         {articles?.slice(0, 3).map((article, index) => {
           const slug = generateSlug(article.title);
           return(

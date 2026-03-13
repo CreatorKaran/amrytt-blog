@@ -78,8 +78,8 @@ export default function BlogPost({ blogData }: BlogPostProps) {
 
   // Handle comment update
   const handleCommentUpdate = (updatedComment: Comment & { rating?: number }) => {
-    setComments(prevComments => 
-      prevComments.map(comment => 
+    setComments(prevComments =>
+      prevComments.map(comment =>
         comment._id === updatedComment._id ? updatedComment : comment
       )
     );
@@ -88,7 +88,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
 
   // Handle comment deletion
   const handleCommentDelete = (commentId: string) => {
-    setComments(prevComments => 
+    setComments(prevComments =>
       prevComments.filter(comment => comment._id !== commentId)
     );
   };
@@ -127,16 +127,16 @@ export default function BlogPost({ blogData }: BlogPostProps) {
           comment: newComment.comment.trim(),
           rating: newComment.rating
         });
-        
+
         // Update local state
-        setComments(prevComments => 
-          prevComments.map(comment => 
-            comment._id === editingComment._id 
+        setComments(prevComments =>
+          prevComments.map(comment =>
+            comment._id === editingComment._id
               ? { ...comment, comment: newComment.comment.trim(), rating: newComment.rating }
               : comment
           )
         );
-        
+
         setEditingComment(null);
       } else {
         // Create new comment
@@ -188,7 +188,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     <>
       {generateBlogMetadata({ blog, comments })}
 
-      <div className="bg-[#fafafa] min-h-screen">
+      <div className="bg-[#fafafa] min-h-screen md:px-7 lg:px-0">
         {/* Page Header */}
         <div className="flex flex-col items-center justify-center py-8 md:py-16 w-full">
           <div className="flex flex-col items-center gap-1 text-center max-w-4xl px-6">
@@ -217,8 +217,8 @@ export default function BlogPost({ blogData }: BlogPostProps) {
         </div>
 
         {/* Main Content Container */}
-        <div className="flex justify-center w-full">
-          <div className="flex flex-col lg:flex-row gap-5 w-full max-w-[1200px] px-6">
+        <div className="flex justify-center md:flex-col lg:flex-row w-full">
+          <div className="flex flex-col md:flex-row gap-5 w-full max-w-[1200px]">
             {/* Article Content */}
             <div className="flex-1 flex flex-col gap-8 pb-16">
               {/* Article Meta */}
@@ -250,9 +250,9 @@ export default function BlogPost({ blogData }: BlogPostProps) {
               </div>
 
               {/* Author Section */}
-              <div className="flex flex-col gap-8">
+              <div className="hidden lg:flex flex-col gap-8">
                 <div className="border-t border-[#e5e6ea] pt-6 h-[296px] px-6">
-                  <div className="flex items-start gap-2 mb-3">
+                  <div className="flex justify-center items-center gap-2 mb-3">
                     <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">About</span>
                     <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">{blog.author.name}</span>
                   </div>
@@ -262,7 +262,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                       alt={blog.author.name}
                       className="w-[100px] h-[100px] rounded-full object-cover"
                     />
-                    <p className="text-[#4e5265] text-base italic font-semibold leading-6 tracking-[1px] text-center">
+                    <p className="text-[#4e5265] text-base italic font-semibold leading-6 tracking-[1px] text-justify">
                       With over a decade in fitness, {blog.author.name} specializes in strength training. Certified by NASM, he designs challenging yet achievable workout programs. His passion is helping clients build strength and confidence through personalized routines. Outside the gym, {blog.author.name} enjoys running and outdoor adventures.
                     </p>
                   </div>
@@ -273,7 +273,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
             </div>
 
             {/* Sidebar */}
-            <div className="w-full lg:w-[341px] px-5 py-6 order-first lg:order-last">
+            <div className="w-full md:w-[263px] lg:w-[341px] md:px-4 px-5 py-6 order-first md:order-last">
               <div className="flex flex-col gap-10 lg:gap-[100px]">
                 {/* Explore More */}
                 <ExploreMore articles={exploreMore} />
@@ -282,7 +282,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                   <h3 className="text-[#10152e] text-xl font-semibold leading-7 tracking-[1px]">
                     Tour Guides
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6 w-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 lg:gap-6 w-full">
                     {tourGuides?.slice(0, 3).map((guide, index) => (
                       <div key={guide._id} className="flex flex-col gap-4 lg:gap-6 w-full">
                         <div className="flex flex-col gap-3 lg:gap-4 w-full">
@@ -320,6 +320,27 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                 </div>
               </div>
             </div>
+          </div>
+          {/* Author Section */}
+          <div className="flex lg:hidden flex-col gap-8">
+            <div className="border-t border-[#e5e6ea] pt-6 h-[296px] px-6">
+              <div className="flex items-start justify-center gap-2 mb-3">
+                <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">About</span>
+                <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">{blog.author.name}</span>
+              </div>
+              <div className="flex flex-col items-center gap-3">
+                <img
+                  src={blog.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author.name)}&background=2563eb&color=fff`}
+                  alt={blog.author.name}
+                  className="w-[100px] h-[100px] rounded-full object-cover"
+                />
+                <p className="text-[#4e5265] text-base italic font-semibold leading-6 tracking-[1px] text-justify">
+                  With over a decade in fitness, {blog.author.name} specializes in strength training. Certified by NASM, he designs challenging yet achievable workout programs. His passion is helping clients build strength and confidence through personalized routines. Outside the gym, {blog.author.name} enjoys running and outdoor adventures.
+                </p>
+              </div>
+            </div>
+            {/* Navigation Buttons */}
+            <Navigation navigation={navigation} />
           </div>
         </div>
 
@@ -412,11 +433,10 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                       value={newComment.name}
                       onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
                       disabled={!!editingComment}
-                      className={`w-full h-12 rounded-xl px-4 mt-2 text-black border-0 outline-none transition-all ${
-                        editingComment 
-                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                      className={`w-full h-12 rounded-xl px-4 mt-2 text-black border-0 outline-none transition-all ${editingComment
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                           : 'bg-[#f5f5f5] hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500'
-                      }`}
+                        }`}
                     />
                   </div>
 
@@ -430,11 +450,10 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                       value={newComment.email}
                       onChange={(e) => setNewComment({ ...newComment, email: e.target.value })}
                       disabled={!!editingComment}
-                      className={`w-full h-12 rounded-xl px-4 mt-2 text-black border-0 outline-none transition-all ${
-                        editingComment 
-                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                      className={`w-full h-12 rounded-xl px-4 mt-2 text-black border-0 outline-none transition-all ${editingComment
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                           : 'bg-[#f5f5f5] hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500'
-                      }`}
+                        }`}
                     />
                   </div>
                 </div>
@@ -478,7 +497,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                       </span>
                     </button>
                   )}
-                  
+
                   {/* Send/Update Button */}
                   <button
                     onClick={handleSubmitComment}

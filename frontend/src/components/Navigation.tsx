@@ -24,7 +24,7 @@ export default function Navigation({ navigation }: NavigationProps) {
                             </svg>
                             <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px] group-hover:text-white">Previous</span>
                         </div> </Link>
-                        <span className="text-[#262d4d] text-sm leading-5 tracking-[1px] text-right">{navigation.previous.title}</span>
+                        <span className="text-[#262d4d] text-sm leading-5 tracking-[1px] text-left">{navigation.previous.title}</span>
                     </div>
                 )}
                 {!navigation.previous && <div className="flex-1" />}
