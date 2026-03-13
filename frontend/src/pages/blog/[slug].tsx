@@ -188,7 +188,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     <>
       {generateBlogMetadata({ blog, comments })}
 
-      <div className="bg-[#fafafa] min-h-screen md:px-7 lg:px-0">
+      <div className="bg-[#fafafa] min-h-screen px-3.5 md:px-7 lg:px-0">
         {/* Page Header */}
         <div className="flex flex-col items-center justify-center py-8 md:py-16 w-full">
           <div className="flex flex-col items-center gap-1 text-center max-w-4xl px-6">
@@ -273,7 +273,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
             </div>
 
             {/* Sidebar */}
-            <div className="w-full md:w-[263px] lg:w-[341px] md:px-4 px-5 py-6 order-first md:order-last">
+            <div className="w-full hidden md:block md:w-[263px] lg:w-[341px] md:px-4 px-5 py-6 order-first md:order-last">
               <div className="flex flex-col gap-10 lg:gap-[100px]">
                 {/* Explore More */}
                 <ExploreMore articles={exploreMore} />
@@ -322,7 +322,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
             </div>
           </div>
           {/* Author Section */}
-          <div className="flex lg:hidden flex-col gap-8">
+          <div className="hidden md:flex lg:hidden flex-col gap-8">
             <div className="border-t border-[#e5e6ea] pt-6 h-[296px] px-6">
               <div className="flex items-start justify-center gap-2 mb-3">
                 <span className="text-[#10152e] text-xl leading-[30px] tracking-[1px]">About</span>
