@@ -2,23 +2,18 @@ import { Comment } from '@/types/blog';
 import moment from 'moment';
 import StarRating from './StarRating';
 import { useState, useRef, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { updateComment, deleteComment } from '@/lib/api';
-
-// Dynamically import CommentEditor
-const CommentEditor = dynamic(() => import('./CommentEditor'), {
-  ssr: false,
-});
+import { deleteComment } from '@/lib/api';
+import CommentStarRating from './CommentStarRating';
 
 interface CommentCardProps {
   comment: Comment & { rating?: number };
   onCommentUpdate?: (updatedComment: Comment & { rating?: number }) => void;
   onCommentDelete?: (commentId: string) => void;
+  onCommentEdit?: (comment: Comment) => void;
 }
 
-export default function CommentCard({ comment, onCommentUpdate, onCommentDelete }: CommentCardProps) {
+export default function CommentCard({ comment, onCommentUpdate, onCommentDelete, onCommentEdit }: CommentCardProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +34,7 @@ export default function CommentCard({ comment, onCommentUpdate, onCommentDelete 
   }, []);
 
   const handleEdit = () => {
-    setIsEditing(true);
+    onCommentEdit?.(comment);
     setIsMenuOpen(false);
   };
 
@@ -58,36 +53,9 @@ export default function CommentCard({ comment, onCommentUpdate, onCommentDelete 
     }
   };
 
-  const handleSaveEdit = async (data: { author: string; comment: string; rating?: number }) => {
-    try {
-      const updatedComment = await updateComment(comment._id, data);
-      onCommentUpdate?.({ ...updatedComment, rating: data.rating });
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error updating comment:', error);
-      alert('Failed to update comment. Please try again.');
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-  };
-
-  if (isEditing) {
-    return (
-      <CommentEditor
-        initialAuthor={comment.author}
-        initialComment={comment.comment}
-        initialRating={comment.rating}
-        onSave={handleSaveEdit}
-        onCancel={handleCancelEdit}
-      />
-    );
-  }
-
   return (
-    <div key={comment._id} className="w-full hover:border hover:border-gray-200 p-2 transition-shadow hover:shadow-md group relative">
-      <div className="flex gap-5 items-start w-full" onClick={handleEdit}>
+    <div key={comment._id} className="w-full" title='Click to Edit' onClick={handleEdit}>
+      <div className="flex gap-5 items-start w-full">
         <img
           src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author)}&background=2563eb&color=fff`}
           alt={comment.author}
@@ -117,10 +85,6 @@ export default function CommentCard({ comment, onCommentUpdate, onCommentDelete 
           </p>
         </div>
       </div>
-      {/* {index < combinedComments.slice(0, 2).length - 1 && (
-        <div className="w-full h-px bg-gray-200 mt-8"></div>
-    )} */}
     </div>
   );
-
 }

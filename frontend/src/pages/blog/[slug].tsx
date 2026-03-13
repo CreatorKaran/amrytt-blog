@@ -9,7 +9,8 @@ import {
   generateSlug,
   getBlogBySlug,
   BlogBySlugResponse,
-  createComment
+  createComment,
+  updateComment
 } from '@/lib/api';
 import { generateBlogMetadata } from '@/lib/metadata';
 import Link from 'next/link';
@@ -20,6 +21,7 @@ import CommentSkeleton from '@/components/CommentSkeleton';
 import CommentCard from '@/components/CommentCard';
 import InteractiveStarRating from '@/components/InteractiveStarRating';
 import MessageIcon from '@/components/icons/Message';
+import CommentStarRating from '@/components/CommentStarRating';
 
 interface BlogPostProps {
   blogData: BlogBySlugResponse;
@@ -27,27 +29,6 @@ interface BlogPostProps {
 
 // Combine comments and ratings into a single display format
 interface CombinedComment extends Comment { }
-
-// Star Rating Component for Comments
-function CommentStarRating({ rating }: { rating: number }) {
-  const stars = Array.from({ length: 5 }, (_, i) => i + 1);
-
-  return (
-    <div className="flex gap-1 items-center">
-      {stars.map((star) => (
-        <svg
-          key={star}
-          className={`w-[18px] h-[18px] ${star <= rating ? 'text-yellow-400' : 'text-gray-300'
-            }`}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-    </div>
-  );
-}
 
 export default function BlogPost({ blogData }: BlogPostProps) {
   const { blog, relatedArticles, exploreMore, tourGuides, navigation } = blogData;
@@ -63,6 +44,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [editingComment, setEditingComment] = useState<Comment | null>(null);
 
   useEffect(() => {
     const fetchCommentsAndRatings = async () => {
@@ -101,6 +83,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
         comment._id === updatedComment._id ? updatedComment : comment
       )
     );
+    setEditingComment(null);
   };
 
   // Handle comment deletion
@@ -110,10 +93,26 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     );
   };
 
+  // Handle edit comment
+  const handleEditComment = (comment: Comment) => {
+    setEditingComment(comment);
+    setNewComment({
+      name: comment.author,
+      email: comment.email,
+      comment: comment.comment,
+      rating: comment.rating || 5
+    });
+  };
+
   // Handle form submission
   const handleSubmitComment = async () => {
-    if (!newComment.name.trim() || !newComment.comment.trim()) {
+    if (!newComment?.name?.trim() || !newComment?.comment?.trim()) {
       setSubmitError('Please fill in your name and comment.');
+      return;
+    }
+
+    if (!newComment?.email?.trim()) {
+      setSubmitError('Please fill in your email.');
       return;
     }
 
@@ -122,12 +121,35 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     setSubmitSuccess(false);
 
     try {
-      // Submit comment with rating
-      await createComment(blog._id, {
-        author: newComment.name.trim(),
-        comment: newComment.comment.trim(),
-        rating: newComment.rating
-      });
+      if (editingComment) {
+        // Update existing comment
+        await updateComment(editingComment._id, {
+          comment: newComment.comment.trim(),
+          rating: newComment.rating
+        });
+        
+        // Update local state
+        setComments(prevComments => 
+          prevComments.map(comment => 
+            comment._id === editingComment._id 
+              ? { ...comment, comment: newComment.comment.trim(), rating: newComment.rating }
+              : comment
+          )
+        );
+        
+        setEditingComment(null);
+      } else {
+        // Create new comment
+        await createComment(blog._id, {
+          author: newComment.name.trim(),
+          email: newComment.email.trim(),
+          comment: newComment.comment.trim(),
+          rating: newComment.rating
+        });
+
+        // Refresh comments
+        await refreshComments();
+      }
 
       // Reset form
       setNewComment({
@@ -137,18 +159,26 @@ export default function BlogPost({ blogData }: BlogPostProps) {
         rating: 5
       });
 
-      // Refresh comments
-      await refreshComments();
-
       // Show success message briefly
       setSubmitSuccess(true);
       setTimeout(() => setSubmitSuccess(false), 3000);
     } catch (error) {
       console.error('Error submitting comment:', error);
-      setSubmitError('Failed to submit comment. Please try again.');
+      setSubmitError(`Failed to ${editingComment ? 'update' : 'submit'} comment. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditingComment(null);
+    setNewComment({
+      name: '',
+      email: '',
+      comment: '',
+      rating: 5
+    });
   };
   // Combine comments and ratings for display
   const combinedComments: CombinedComment[] = comments
@@ -312,6 +342,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                     comment={comment}
                     onCommentUpdate={handleCommentUpdate}
                     onCommentDelete={handleCommentDelete}
+                    onCommentEdit={handleEditComment}
                   />
                 ))}
               </div>
@@ -350,15 +381,23 @@ export default function BlogPost({ blogData }: BlogPostProps) {
           </div>
         </div>
 
-        {/* Add Comment Section */}
+        {/* Add/Edit Comment Section */}
         <div className="flex flex-col gap-8 pb-8 w-full">
           <div className="max-w-[1200px] mx-auto px-6 w-full">
             <div className="flex items-center gap-2">
               <div className="w-1 h-3 bg-black rounded-xl"></div>
               <h2 className="text-black text-xl font-medium leading-normal tracking-[1px] capitalize">
-                Add a comment
+                {editingComment ? 'Edit Comment' : 'Add a comment'}
               </h2>
             </div>
+
+            {editingComment && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-blue-800 text-sm">
+                  You are editing your comment. Name and email fields are disabled during editing.
+                </p>
+              </div>
+            )}
 
             <div className="flex flex-col gap-5 mt-8 w-full">
               <div className="flex flex-col lg:flex-row gap-6 w-full">
@@ -372,7 +411,12 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                       type="text"
                       value={newComment.name}
                       onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
-                      className="w-full h-12 bg-[#f5f5f5] rounded-xl px-4 mt-2 text-black border-0 outline-none"
+                      disabled={!!editingComment}
+                      className={`w-full h-12 rounded-xl px-4 mt-2 text-black border-0 outline-none transition-all ${
+                        editingComment 
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                          : 'bg-[#f5f5f5] hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500'
+                      }`}
                     />
                   </div>
 
@@ -385,7 +429,12 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                       type="email"
                       value={newComment.email}
                       onChange={(e) => setNewComment({ ...newComment, email: e.target.value })}
-                      className="w-full h-12 bg-[#f5f5f5] rounded-xl px-4 mt-2 text-black border-0 outline-none"
+                      disabled={!!editingComment}
+                      className={`w-full h-12 rounded-xl px-4 mt-2 text-black border-0 outline-none transition-all ${
+                        editingComment 
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+                          : 'bg-[#f5f5f5] hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500'
+                      }`}
                     />
                   </div>
                 </div>
@@ -399,13 +448,13 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                     value={newComment.comment}
                     onChange={(e) => setNewComment({ ...newComment, comment: e.target.value })}
                     placeholder="Write anything..."
-                    className="flex-1 min-h-[120px] lg:min-h-0 bg-[#f5f5f5] rounded-[10px] px-6 py-6 text-black placeholder-gray-400 resize-none border-0 outline-none"
+                    className="flex-1 min-h-[120px] lg:min-h-0 bg-[#f5f5f5] rounded-[10px] px-6 py-6 text-black placeholder-gray-400 resize-none border-0 outline-none transition-all hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
               <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch lg:items-center w-full">
                 {/* Rating Section */}
-                <div className="flex-1 bg-[#f5f5f5] rounded-xl px-4 py-3 lg:py-1 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-0">
+                <div className="flex-1 bg-[#f5f5f5] rounded-xl px-4 py-3 lg:py-1 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-0 transition-all hover:bg-gray-100">
                   <span className="text-black text-base font-medium tracking-[1px] capitalize">
                     Rate the usefulness of the article
                   </span>
@@ -417,23 +466,37 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                   </div>
                 </div>
 
-                {/* Send Button */}
-                <button
-                  onClick={handleSubmitComment}
-                  disabled={isSubmitting}
-                  className="bg-black flex items-center gap-2 px-4 py-3 rounded-xl h-12 w-full lg:w-[109px] justify-center hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <MessageIcon className="w-4 h-4 text-white" />
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  {editingComment && (
+                    <button
+                      onClick={handleCancelEdit}
+                      className="bg-gray-500 flex items-center gap-2 px-4 py-3 rounded-xl h-12 justify-center hover:bg-gray-600 transition-colors"
+                    >
                       <span className="text-white text-sm font-medium tracking-[0.14px] capitalize leading-5">
-                        Send
+                        Cancel
                       </span>
-                    </>
+                    </button>
                   )}
-                </button>
+                  
+                  {/* Send/Update Button */}
+                  <button
+                    onClick={handleSubmitComment}
+                    disabled={isSubmitting}
+                    className="bg-black flex items-center gap-2 px-4 py-3 rounded-xl h-12 w-full lg:w-[109px] justify-center hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <>
+                        <MessageIcon className="w-4 h-4 text-white" />
+                        <span className="text-white text-sm font-medium tracking-[0.14px] capitalize leading-5">
+                          {editingComment ? 'Update' : 'Send'}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Error Message */}
@@ -446,7 +509,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
               {/* Success Message */}
               {submitSuccess && (
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm">
-                  Comment submitted successfully! Thank you for your feedback.
+                  Comment {editingComment ? 'updated' : 'submitted'} successfully! Thank you for your feedback.
                 </div>
               )}
             </div>

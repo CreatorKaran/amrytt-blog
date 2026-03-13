@@ -21,6 +21,7 @@ export interface Comment {
   _id: string;
   blogId: string;
   author: string;
+  email: string;
   comment: string;
   rating?: number;
   date: string;

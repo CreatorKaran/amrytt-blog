@@ -5,7 +5,7 @@ import {
   updateComment,
   deleteComment,
 } from '../controllers/commentController';
-import { validate, blogIdWithCommentSchema, blogIdSchema, commentUpdateSchema } from '../middleware/validation';
+import { validate, blogIdWithCommentSchema, blogIdSchema, commentUpdateSchema, idSchema } from '../middleware/validation';
 
 const router = Router();
 

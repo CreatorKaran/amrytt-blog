@@ -112,7 +112,7 @@ export async function getCommentsByBlogId(blogId: string): Promise<Comment[]> {
   return result.data;
 }
 
-export async function createComment(blogId: string, commentData: { author: string; comment: string; rating?: number }): Promise<Comment> {
+export async function createComment(blogId: string, commentData: { author: string; email: string; comment: string; rating?: number }): Promise<Comment> {
   const response = await fetch(`${API_BASE_URL}/comments/blog/${blogId}`, {
     method: 'POST',
     headers: {
@@ -124,7 +124,7 @@ export async function createComment(blogId: string, commentData: { author: strin
   return result.data;
 }
 
-export async function updateComment(id: string, commentData: { author: string; comment: string; rating?: number }): Promise<Comment> {
+export async function updateComment(id: string, commentData: { comment: string; rating?: number }): Promise<Comment> {
   const response = await fetch(`${API_BASE_URL}/comments/${id}`, {
     method: 'PUT',
     headers: {
