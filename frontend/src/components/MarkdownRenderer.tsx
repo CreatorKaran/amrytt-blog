@@ -16,32 +16,32 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
         components={{
           // Custom styling for different markdown elements
           h1: ({ children }: any) => (
-            <h1 className="text-4xl font-bold mt-8 mb-6 leading-tight text-gray-900">
+            <h1 className="font-nato text-4xl font-bold mt-8 mb-6 leading-tight text-gray-900">
               {children}
             </h1>
           ),
           h2: ({ children }: any) => (
-            <h2 className="text-3xl font-bold mt-8 mb-6 leading-tight text-gray-900">
+            <h2 className="font-nato text-3xl font-bold mt-8 mb-6 leading-tight text-gray-900">
               {children}
             </h2>
           ),
           h3: ({ children }: any) => (
-            <h3 className="text-2xl font-semibold mt-6 mb-4 leading-snug text-gray-900">
+            <h3 className="font-nato text-2xl font-semibold mt-6 mb-4 leading-snug text-gray-900">
               {children}
             </h3>
           ),
           h4: ({ children }: any) => (
-            <h4 className="text-xl font-semibold mt-6 mb-4 leading-snug text-gray-900">
+            <h4 className="font-nato text-xl font-semibold mt-6 mb-4 leading-snug text-gray-900">
               {children}
             </h4>
           ),
           h5: ({ children }: any) => (
-            <h5 className="text-lg font-semibold mt-4 mb-3 leading-snug text-gray-900">
+            <h5 className="font-nato text-lg font-semibold mt-4 mb-3 leading-snug text-gray-900">
               {children}
             </h5>
           ),
           h6: ({ children }: any) => (
-            <h6 className="text-base font-semibold mt-4 mb-3 leading-snug text-gray-900">
+            <h6 className="font-nato text-base font-semibold mt-4 mb-3 leading-snug text-gray-900">
               {children}
             </h6>
           ),
@@ -66,7 +66,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             </li>
           ),
           blockquote: ({ children }: any) => (
-            <blockquote className="border-l-4 border-blue-500 pl-6 my-6 italic text-gray-700 bg-gray-50 py-4">
+          <blockquote className="font-nato! border-y pl-6 my-6 italic text-gray-300 bg-gray-50 py-4">
               {children}
             </blockquote>
           ),
@@ -79,7 +79,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
               );
             }
             return (
-              <code className={`${className} block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto`} {...props}>
+              <code className={`w-full ${className} block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto`} {...props}>
                 {children}
               </code>
             );

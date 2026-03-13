@@ -12,7 +12,7 @@ const lato = Lato({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <main className={`${lato.variable} font-sans`}>
+    <main className={`${lato.className} font-sans`}>
       <Component {...pageProps} />
     </main>
   )

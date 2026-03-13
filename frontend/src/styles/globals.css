@@ -3,12 +3,9 @@
 @import "tailwindcss";
 @import "highlight.js/styles/github.css";
 
-:root {
-  --font-lato: 'Lato', sans-serif !important;
-}
-
-body {
-  font-family: var(--font-lato), sans-serif !important;
+/* styles/globals.css */
+html, body {
+  font-family: inherit !important;
 }
 
 /* Skeleton animation for loading states */
