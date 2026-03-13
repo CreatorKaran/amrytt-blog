@@ -2,18 +2,25 @@ import React from 'react';
 
 export default function CommentSkeleton() {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6">
-      <div className="flex gap-4 mb-4">
-        <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
-        <div className="flex-1 flex flex-col gap-2">
-          <div className="w-32 h-4 bg-gray-200 rounded animate-pulse"></div>
-          <div className="w-24 h-3.5 bg-gray-200 rounded animate-pulse"></div>
+    <div className="flex flex-col gap-6 mt-8">
+
+      {Array.from({ length: 2 }).map((_, index) => (
+        <div key={index} className="animate-pulse">
+          <div className="flex gap-5 items-start">
+            <div className="w-[60px] h-[60px] bg-gray-300 rounded-full"></div>
+            <div className="flex-1 space-y-2">
+              <div className='flex flex-row justify-between'>
+                <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                <div className="h-4 bg-gray-300 rounded w-20"></div>
+              </div>
+              <div className="h-4 bg-gray-300 rounded w-full"></div>
+              <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="space-y-2">
-        <div className="w-full h-3.5 bg-gray-200 rounded animate-pulse"></div>
-        <div className="w-4/5 h-3.5 bg-gray-200 rounded animate-pulse"></div>
-      </div>
+      ))}
+
+
     </div>
   );
 }

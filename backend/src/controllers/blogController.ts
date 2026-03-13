@@ -35,7 +35,6 @@ export const getAllBlogs = async (
 ): Promise<void> => {
   try {
     const blogs = await Blog.find().sort({ date: -1 });
-    console.log('blogs...', blogs)
     res.status(200).json({
       success: true,
       count: blogs.length,

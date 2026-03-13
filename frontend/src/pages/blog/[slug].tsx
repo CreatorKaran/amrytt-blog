@@ -16,6 +16,7 @@ import Link from 'next/link';
 import RelatedArticles from '@/components/RelatedArticles';
 import ExploreMore from '@/components/ExploreMore';
 import Navigation from '@/components/Navigation';
+import CommentSkeleton from '@/components/CommentSkeleton';
 
 interface BlogPostProps {
   blogData: BlogBySlugResponse;
@@ -345,28 +346,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
             </div>
           )}
           {isLoadingComments && (
-            <div className="flex flex-col gap-6 mt-8">
-              <div className="animate-pulse">
-                <div className="flex gap-5 items-start">
-                  <div className="w-[60px] h-[60px] bg-gray-300 rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                  </div>
-                </div>
-              </div>
-              <div className="animate-pulse">
-                <div className="flex gap-5 items-start">
-                  <div className="w-[60px] h-[60px] bg-gray-300 rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-                    <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CommentSkeleton />
           )}
 
           {commentsError && (

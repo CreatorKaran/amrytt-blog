@@ -13,7 +13,6 @@ interface NavigationProps {
 }
 
 export default function Navigation({ navigation }: NavigationProps) {
-    console.log(navigation)
     return (
         <div className="border-t border-[#e5e6ea] pt-8 min-h-[104px]">
             <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4">
