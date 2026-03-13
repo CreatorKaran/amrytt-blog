@@ -9,7 +9,9 @@ import {
   getRatingsByBlogId,
   generateSlug,
   getBlogBySlug,
-  BlogBySlugResponse
+  BlogBySlugResponse,
+  createComment,
+  createRating
 } from '@/lib/api';
 import { generateBlogMetadata } from '@/lib/metadata';
 import Link from 'next/link';
@@ -114,6 +116,9 @@ export default function BlogPost({ blogData }: BlogPostProps) {
     comment: '',
     rating: 5
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     const fetchCommentsAndRatings = async () => {
@@ -139,6 +144,67 @@ export default function BlogPost({ blogData }: BlogPostProps) {
 
     fetchCommentsAndRatings();
   }, [blog._id]);
+
+  // Function to refresh comments after submission
+  const refreshComments = async () => {
+    try {
+      const [commentsData, ratingsData] = await Promise.all([
+        getCommentsByBlogId(blog._id),
+        getRatingsByBlogId(blog._id)
+      ]);
+      setComments(commentsData);
+      setRatings(ratingsData.data);
+    } catch (error) {
+      console.error('Error refreshing comments:', error);
+    }
+  };
+
+  // Handle form submission
+  const handleSubmitComment = async () => {
+    if (!newComment.name.trim() || !newComment.comment.trim()) {
+      setSubmitError('Please fill in your name and comment.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    try {
+      // Submit both comment and rating
+      await Promise.all([
+        createComment(blog._id, {
+          author: newComment.name.trim(),
+          comment: newComment.comment.trim()
+        }),
+        createRating(blog._id, {
+          author: newComment.name.trim(),
+          rating: newComment.rating,
+          review: newComment.comment.trim()
+        })
+      ]);
+
+      // Reset form
+      setNewComment({
+        name: '',
+        email: '',
+        comment: '',
+        rating: 5
+      });
+
+      // Refresh comments
+      await refreshComments();
+      
+      // Show success message briefly
+      setSubmitSuccess(true);
+      setTimeout(() => setSubmitSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+      setSubmitError('Failed to submit comment. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   // Combine comments and ratings for display
   const combinedComments: CombinedComment[] = [
     ...comments,
@@ -312,7 +378,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                     <img
                       src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author)}&background=2563eb&color=fff`}
                       alt={comment.author}
-                      className="w-[60px] h-[60px] rounded-full object-cover flex-shrink-0"
+                      className="w-[60px] h-[60px] rounded-full object-cover shrink-0"
                     />
                     <div className="flex-1 flex flex-col gap-3 min-w-0">
                       <div className="flex items-start justify-between w-full">
@@ -425,15 +491,39 @@ export default function BlogPost({ blogData }: BlogPostProps) {
               </div>
 
               {/* Send Button */}
-              <button className="bg-black flex items-center gap-2 px-4 py-3 rounded-xl h-12 w-full lg:w-[109px] justify-center hover:bg-gray-800 transition-colors">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                </svg>
-                <span className="text-white text-sm font-medium tracking-[0.14px] capitalize leading-5">
-                  Send
-                </span>
+              <button 
+                onClick={handleSubmitComment}
+                disabled={isSubmitting}
+                className="bg-black flex items-center gap-2 px-4 py-3 rounded-xl h-12 w-full lg:w-[109px] justify-center hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                    <span className="text-white text-sm font-medium tracking-[0.14px] capitalize leading-5">
+                      Send
+                    </span>
+                  </>
+                )}
               </button>
             </div>
+
+            {/* Error Message */}
+            {submitError && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                {submitError}
+              </div>
+            )}
+
+            {/* Success Message */}
+            {submitSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm">
+                Comment submitted successfully! Thank you for your feedback.
+              </div>
+            )}
           </div>
         </div>
       </div>
