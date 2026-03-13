@@ -45,6 +45,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
+  const [currentExploreIndex, setCurrentExploreIndex] = useState(0);
 
   useEffect(() => {
     const fetchCommentsAndRatings = async () => {
@@ -180,6 +181,26 @@ export default function BlogPost({ blogData }: BlogPostProps) {
       rating: 5
     });
   };
+
+  // Handle Previous button click
+  const handlePrevious = () => {
+    setCurrentExploreIndex(prevIndex => {
+      if (prevIndex <= 0) {
+        return exploreMore.length - 1; // Reset to last index if going negative
+      }
+      return prevIndex - 1;
+    });
+  };
+
+  // Handle Next button click
+  const handleNext = () => {
+    setCurrentExploreIndex(prevIndex => {
+      if (prevIndex >= exploreMore.length - 1) {
+        return 0; // Reset to 0 if going beyond array length
+      }
+      return prevIndex + 1;
+    });
+  };
   // Combine comments and ratings for display
   const combinedComments: CombinedComment[] = comments
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -272,7 +293,125 @@ export default function BlogPost({ blogData }: BlogPostProps) {
               </div>
             </div>
 
-            {/* Sidebar */}
+            {/* Mobile Sidebar Slider */}
+            <div className="w-full md:hidden py-6">
+              <div className="flex flex-col gap-6">
+                {/* Explore More Mobile Slider */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-[#10152e] text-xl font-semibold leading-7 tracking-[1px]">
+                    Explore more
+                  </h3>
+                  <div className="overflow-x-hidden">
+                    <div className="flex gap-4 pb-2 w-full">
+                      {exploreMore?.length > 0 && (() => {
+                        const article = exploreMore[currentExploreIndex];
+                        const slug = generateSlug(article.title);
+                        return (
+                          <Link href={`/blog/${slug}`} key={article._id} className="hover:shadow-2xl flex flex-col gap-4 lg:gap-6 w-full">
+                            <div className="flex flex-col gap-4 lg:gap-6 w-full">
+                              <img
+                                src={article.image}
+                                alt={article.title}
+                                className="w-full h-[165px] object-cover"
+                              />
+                              <div className="flex flex-col gap-3 lg:gap-4 w-full px-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-black text-sm font-medium tracking-[1px]">
+                                    {article.category}
+                                  </span>
+                                  <div className="w-0 h-4 border-l-2 border-gray-300"></div>
+                                  <span className="text-[#757575] text-sm tracking-[1px] whitespace-nowrap">
+                                    {moment(article.date).format('DD MMM YYYY')}
+                                  </span>
+                                </div>
+                                <p className="text-black text-base leading-6 tracking-[1px] w-full">
+                                  {article.title}
+                                </p>
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })()}
+                    </div>
+                    <div className="border-t border-[#e5e6ea] pt-8 min-h-[104px]">
+                      <div className="flex flex-row justify-between items-start w-full gap-4">
+
+                        <div className="flex flex-col gap-2 items-start flex-1">
+                          <div 
+                            onClick={handlePrevious}
+                            className="cursor-pointer flex items-center gap-3 px-4 py-2 border border-[#05091c] rounded-sm hover:bg-[#05091c] hover:text-white transition-colors group"
+                          >
+                            <svg className="w-4 h-4 rotate-90 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px] group-hover:text-white">Previous</span>
+                          </div>
+                        </div>
+
+
+
+                        <div className="flex flex-col gap-2 items-end flex-1">
+                          <div 
+                            onClick={handleNext}
+                            className="cursor-pointer flex items-center gap-3 px-4 py-2 border border-[#05091c] rounded-sm hover:bg-[#05091c] hover:text-white transition-colors group"
+                          >
+                            <span className="text-[#05091c] text-base font-normal leading-6 tracking-[1px] group-hover:text-white">Next</span>
+                            <svg className="w-4 h-4 -rotate-90 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tour Guides Mobile Slider */}
+                <div className="flex flex-col gap-6 lg:gap-10 w-full">
+                  <h3 className="text-[#10152e] text-xl font-semibold leading-7 tracking-[1px]">
+                    Tour Guides
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 lg:gap-6 w-full">
+                    {tourGuides?.slice(0, 3).map((guide, index) => (
+                      <div key={guide._id} className="flex flex-col gap-4 lg:gap-6 w-full">
+                        <div className="flex flex-col gap-3 lg:gap-4 w-full">
+                          <div className="flex items-start gap-4 w-full">
+                            <img
+                              src={guide.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(guide.author.name)}&background=2563eb&color=fff`}
+                              alt={guide.author.name}
+                              className="w-[60px] h-[60px] rounded-full object-cover shrink-0"
+                            />
+                            <div className="flex flex-col gap-1 flex-1 min-w-0">
+                              <h4 className="text-black text-base leading-7 tracking-[1px]">
+                                {guide.author.name}
+                              </h4>
+                              <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-black shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                </svg>
+                                <span className="text-black text-sm leading-5 tracking-[1px] opacity-80 truncate">
+                                  Location, Region
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <CommentStarRating rating={5} />
+                            <span className="text-[#121212] text-[15px] leading-normal tracking-[0.5px]">
+                              (5.0)
+                            </span>
+                          </div>
+                        </div>
+                        {index < 2 && <div className="w-full h-px bg-gray-200 block"></div>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Sidebar */}
             <div className="w-full hidden md:block md:w-[263px] lg:w-[341px] md:px-4 px-5 py-6 order-first md:order-last">
               <div className="flex flex-col gap-10 lg:gap-[100px]">
                 {/* Explore More */}
@@ -313,7 +452,6 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                             </span>
                           </div>
                         </div>
-                        {index < 2 && <div className="w-full h-px bg-gray-200 lg:block hidden"></div>}
                       </div>
                     ))}
                   </div>
@@ -434,8 +572,8 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                       onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
                       disabled={!!editingComment}
                       className={`w-full h-12 rounded-xl px-4 mt-2 text-black border-0 outline-none transition-all ${editingComment
-                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                          : 'bg-[#f5f5f5] hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500'
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#f5f5f5] hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500'
                         }`}
                     />
                   </div>
@@ -451,8 +589,8 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                       onChange={(e) => setNewComment({ ...newComment, email: e.target.value })}
                       disabled={!!editingComment}
                       className={`w-full h-12 rounded-xl px-4 mt-2 text-black border-0 outline-none transition-all ${editingComment
-                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                          : 'bg-[#f5f5f5] hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500'
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#f5f5f5] hover:bg-gray-100 focus:bg-white focus:ring-2 focus:ring-blue-500'
                         }`}
                     />
                   </div>
