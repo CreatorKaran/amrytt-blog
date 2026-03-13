@@ -421,7 +421,7 @@ export default function BlogPost({ blogData }: BlogPostProps) {
             )}
 
             <div className="flex flex-col gap-5 mt-8 w-full">
-              <div className="flex flex-col lg:flex-row gap-6 w-full">
+              <div className="flex flex-col md:flex-row gap-6 w-full">
                 <div className="flex-1 flex flex-col gap-5">
                   {/* Name Field */}
                   <div className="relative w-full">
@@ -471,10 +471,10 @@ export default function BlogPost({ blogData }: BlogPostProps) {
                   />
                 </div>
               </div>
-              <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch lg:items-center w-full">
+              <div className="flex flex-col md:flex-row gap-4 lg:gap-6 items-stretch lg:items-center w-full">
                 {/* Rating Section */}
-                <div className="flex-1 bg-[#f5f5f5] rounded-xl px-4 py-3 lg:py-1 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-0 transition-all hover:bg-gray-100">
-                  <span className="text-black text-base font-medium tracking-[1px] capitalize">
+                <div className="flex-1 bg-[#f5f5f5] rounded-xl px-4 py-3 md:py-1 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 transition-all hover:bg-gray-100">
+                  <span className="text-black text-xs lg:text-base font-medium tracking-[1px] capitalize">
                     Rate the usefulness of the article
                   </span>
                   <div className="overflow-x-auto">
