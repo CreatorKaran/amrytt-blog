@@ -45,10 +45,10 @@ curl http://localhost:5100/api/blogs
 
 ## Project Structure
 
-- `src/models/` - Database schemas (Blog, Comment, Rating)
+- `src/models/` - Database schemas (Blog, Comment with optional rating)
 - `src/controllers/` - Business logic for each module
 - `src/routes/` - API endpoints with Swagger docs
 - `src/middleware/` - Validation and error handling
 - `src/config/` - Database and Swagger configuration
 
-Each module (Blog, Comment, Rating) is completely independent and self-contained.
+Each module (Blog, Comment) is completely independent and self-contained.

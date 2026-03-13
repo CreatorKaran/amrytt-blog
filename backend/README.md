@@ -1,14 +1,14 @@
 # Blog API - Backend
 
-A comprehensive RESTful API for managing blog posts, comments, and ratings built with Node.js, Express, TypeScript, and MongoDB.
+A comprehensive RESTful API for managing blog posts and comments built with Node.js, Express, TypeScript, and MongoDB.
 
 ## Features
 
 - **Blog Management**: Create, read, update, and delete blog posts
-- **Comments System**: Add and retrieve comments for blog posts
-- **Rating & Review System**: Submit star ratings (1-5) and reviews for posts
+- **Comments System**: Add, retrieve, update, and delete comments for blog posts
+- **Integrated Rating System**: Comments can include star ratings (1-5) and reviews
 - **Swagger Documentation**: Interactive API documentation at `/api-docs`
-- **Input Validation**: Request validation using Joi
+- **Input Validation**: Request validation using express-validator
 - **Error Handling**: Centralized error handling middleware
 - **TypeScript**: Full type safety throughout the application
 - **Modular Architecture**: Clean separation of concerns (models, controllers, routes)
@@ -16,12 +16,12 @@ A comprehensive RESTful API for managing blog posts, comments, and ratings built
 ## Tech Stack
 
 - **Runtime**: Node.js
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: MongoDB with Mongoose ODM
-- **Validation**: Joi
+- **Framework**: Express.js 5.2.1
+- **Language**: TypeScript 5.9.3
+- **Database**: MongoDB with Mongoose 8.23.0
+- **Validation**: express-validator (via middleware)
 - **Documentation**: Swagger (OpenAPI 3.0)
-- **Dev Tools**: nodemon, ts-node
+- **Dev Tools**: nodemon 3.1.14, ts-node 10.9.2
 
 ## Project Structure
 
@@ -30,22 +30,28 @@ backend/
 ├── src/
 │   ├── config/
 │   │   ├── database.ts       # MongoDB connection
-│   │   └── swagger.ts         # Swagger configuration
+│   │   ├── seed.ts           # Auto-seeding logic
+│   │   ├── seedData.ts       # Sample blog data (6 posts)
+│   │   └── swagger.ts        # Swagger configuration
 │   ├── controllers/
 │   │   ├── blogController.ts
-│   │   ├── commentController.ts
-│   │   └── ratingController.ts
+│   │   └── commentController.ts
 │   ├── middleware/
 │   │   ├── errorHandler.ts   # Global error handler
+│   │   ├── logger.ts         # Request/error logging
 │   │   └── validation.ts     # Request validators
 │   ├── models/
 │   │   ├── Blog.ts
-│   │   ├── Comment.ts
-│   │   └── Rating.ts
+│   │   └── Comment.ts        # Includes rating field
 │   ├── routes/
+│   │   ├── index.ts          # Route aggregation
 │   │   ├── blogRoutes.ts
-│   │   ├── commentRoutes.ts
-│   │   └── ratingRoutes.ts
+│   │   └── commentRoutes.ts
+│   ├── scripts/
+│   │   └── manualSeed.ts     # Manual database seeding
+│   ├── utils/
+│   │   ├── common.ts         # Common utilities
+│   │   └── logger.ts         # Logging utility
 │   └── index.ts              # Application entry point
 ├── .env.example
 ├── package.json
@@ -128,17 +134,12 @@ backend/
 - `PUT /api/blogs/:id` - Update a blog post
 - `DELETE /api/blogs/:id` - Delete a blog post
 
-### Comments
+### Comments (with integrated ratings)
 
-- `POST /api/comments/blog/:blogId` - Add a comment to a blog
+- `POST /api/comments/blog/:blogId` - Add a comment (with optional rating) to a blog
 - `GET /api/comments/blog/:blogId` - Get all comments for a blog
+- `PUT /api/comments/:id` - Update a comment
 - `DELETE /api/comments/:id` - Delete a comment
-
-### Ratings
-
-- `POST /api/ratings/blog/:blogId` - Add a rating and review to a blog
-- `GET /api/ratings/blog/:blogId` - Get all ratings for a blog (includes average)
-- `DELETE /api/ratings/:id` - Delete a rating
 
 ### Documentation
 
@@ -165,26 +166,28 @@ curl -X POST http://localhost:5100/api/blogs \
   }'
 ```
 
-### Add a Comment
+### Add a Comment with Rating
 
 ```bash
 curl -X POST http://localhost:5100/api/comments/blog/{blogId} \
   -H "Content-Type: application/json" \
   -d '{
     "author": "John Doe",
-    "comment": "Great article!"
+    "email": "john@example.com",
+    "comment": "Great article!",
+    "rating": 5
   }'
 ```
 
-### Add a Rating
+### Add a Comment without Rating
 
 ```bash
-curl -X POST http://localhost:5100/api/ratings/blog/{blogId} \
+curl -X POST http://localhost:5100/api/comments/blog/{blogId} \
   -H "Content-Type: application/json" \
   -d '{
     "author": "Jane Smith",
-    "rating": 5,
-    "review": "Excellent content!"
+    "email": "jane@example.com",
+    "comment": "Very helpful information!"
   }'
 ```
 
@@ -201,17 +204,12 @@ curl -X POST http://localhost:5100/api/ratings/blog/{blogId} \
 - `category` (string, required) - Blog category (e.g., Fitness, Nutrition, Yoga)
 - `date` (Date, default: now)
 
-### Comment
+### Comment (with integrated rating)
 - `blogId` (ObjectId, required)
 - `author` (string, required, max 100 chars)
+- `email` (string, required) - Author email
 - `comment` (string, required, max 1000 chars)
-- `date` (Date, default: now)
-
-### Rating
-- `blogId` (ObjectId, required)
-- `author` (string, required, max 100 chars)
-- `rating` (number, required, 1-5)
-- `review` (string, required, max 500 chars)
+- `rating` (number, optional, 1-5) - Star rating
 - `date` (Date, default: now)
 
 ## Validation Rules
@@ -232,13 +230,13 @@ The API uses a centralized error handling middleware that:
 
 ## Special Notes
 
-1. **Modular Design**: Each module (blogs, comments, ratings) is completely independent with its own model, controller, and routes.
+1. **Modular Design**: Each module (blogs, comments) is completely independent with its own model, controller, and routes.
 
-2. **Common Utilities**: Validation middleware and error handling are shared across all modules to maintain DRY principles.
+2. **Integrated Rating System**: Ratings are part of the comment system - users can leave comments with optional star ratings (1-5).
 
-3. **Database Indexes**: Comments and ratings have compound indexes on `blogId` and `createdAt` for optimized queries.
+3. **Common Utilities**: Validation middleware and error handling are shared across all modules to maintain DRY principles.
 
-4. **Average Rating**: The ratings endpoint automatically calculates and returns the average rating for a blog post.
+4. **Database Indexes**: Comments have compound indexes on `blogId` and `createdAt` for optimized queries.
 
 5. **Timestamps**: All models include automatic `createdAt` and `updatedAt` timestamps.
 

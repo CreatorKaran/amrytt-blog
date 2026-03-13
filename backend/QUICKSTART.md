@@ -84,15 +84,11 @@ curl -X POST http://localhost:5100/api/blogs \
 - `PUT /api/blogs/:id` - Update blog
 - `DELETE /api/blogs/:id` - Delete blog
 
-### Comments
-- `POST /api/comments/blog/:blogId` - Add comment
+### Comments (with integrated ratings)
+- `POST /api/comments/blog/:blogId` - Add comment (with optional rating)
 - `GET /api/comments/blog/:blogId` - Get comments
+- `PUT /api/comments/:id` - Update comment
 - `DELETE /api/comments/:id` - Delete comment
-
-### Ratings
-- `POST /api/ratings/blog/:blogId` - Add rating
-- `GET /api/ratings/blog/:blogId` - Get ratings (with average)
-- `DELETE /api/ratings/:id` - Delete rating
 
 ## Sample Data
 

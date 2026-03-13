@@ -14,9 +14,9 @@ A production-ready blog post page built with Next.js, featuring static generatio
    - Each blog post accessible via `/blog/[slug]`
    - ISR (Incremental Static Regeneration) with 60-second revalidation
 
-2. **Client-Side Comments & Ratings**
-   - Comments and ratings fetched client-side using `useEffect`
-   - Combined display of comments and ratings as "Reviews"
+2. **Client-Side Comments with Integrated Ratings**
+   - Comments fetched client-side using `useEffect`
+   - Comments can include optional star ratings (1-5)
    - Loading skeletons during fetch
    - Error handling with user-friendly messages
    - Real-time data from MongoDB via API
@@ -49,9 +49,10 @@ A production-ready blog post page built with Next.js, featuring static generatio
 - **Layout Component**: Consistent page structure across routes
 - **Star Rating System**: Visual rating component with multiple sizes
 - **Related Articles**: Contextual content recommendations
-- **Sidebar**: Sticky sidebar with top guides
+- **Explore More**: Additional content suggestions
+- **Navigation**: Site-wide navigation component
 - **Accessibility**: Semantic HTML, focus states, proper contrast
-- **Average Ratings**: Calculated and displayed from all ratings
+- **Integrated Rating Display**: Comments with ratings shown together
 
 ## Project Structure
 
@@ -124,8 +125,16 @@ Visit `http://localhost:3000`
 
 - `GET /api/blogs` - Fetch all blog posts
 - `GET /api/blogs/:id` - Fetch single blog post
-- `GET /api/comments/blog/:blogId` - Fetch comments
-- `GET /api/ratings/blog/:blogId` - Fetch ratings with average
+- `GET /api/comments/blog/:blogId` - Fetch comments (with optional ratings)
+
+### API Functions Available (but not all used in current implementation)
+
+- `POST /api/blogs` - Create blog post
+- `PUT /api/blogs/:id` - Update blog post
+- `DELETE /api/blogs/:id` - Delete blog post
+- `POST /api/comments/blog/:blogId` - Create comment (with optional rating)
+- `PUT /api/comments/:id` - Update comment
+- `DELETE /api/comments/:id` - Delete comment
 
 See [API_INTEGRATION.md](./API_INTEGRATION.md) for complete documentation.
 
@@ -158,13 +167,13 @@ generateSlug("The Ultimate Guide")
 // → "the-ultimate-guide"
 ```
 
-### Combined Reviews
+### Combined Comments and Ratings
 
-Comments and ratings are merged into single "Reviews" section:
-- Comments (text only)
-- Ratings (text + star rating)
-- Sorted by date (newest first)
-- Average rating displayed in header
+Comments and ratings are integrated into a single system:
+- Comments can include optional star ratings (1-5)
+- Comments without ratings are displayed as text-only
+- Comments with ratings show both text and stars
+- All displayed together in chronological order
 
 ### Error Handling
 

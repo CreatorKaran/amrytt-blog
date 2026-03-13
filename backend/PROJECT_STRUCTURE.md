@@ -58,17 +58,11 @@ backend/
 - **Routes**: `routes/blogRoutes.ts`
 - **Features**: CRUD operations, auto-seeding, image support, author info
 
-### 💬 Comments Module
+### 💬 Comments Module (with integrated ratings)
 - **Model**: `models/Comment.ts`
 - **Controller**: `controllers/commentController.ts`
 - **Routes**: `routes/commentRoutes.ts`
-- **Features**: Add/fetch/delete comments per blog
-
-### ⭐ Ratings Module
-- **Model**: `models/Rating.ts`
-- **Controller**: `controllers/ratingController.ts`
-- **Routes**: `routes/ratingRoutes.ts`
-- **Features**: Star ratings (1-5), reviews, average calculation
+- **Features**: Add/fetch/update/delete comments, optional star ratings (1-5)
 
 ## Shared Components
 
@@ -128,18 +122,12 @@ PUT    /api/blogs/:id       Update blog
 DELETE /api/blogs/:id       Delete blog
 ```
 
-### Comments
+### Comments (with integrated ratings)
 ```
-POST   /api/comments/blog/:blogId    Add comment
+POST   /api/comments/blog/:blogId    Add comment (with optional rating)
 GET    /api/comments/blog/:blogId    Get comments
+PUT    /api/comments/:id             Update comment
 DELETE /api/comments/:id             Delete comment
-```
-
-### Ratings
-```
-POST   /api/ratings/blog/:blogId     Add rating
-GET    /api/ratings/blog/:blogId     Get ratings + average
-DELETE /api/ratings/:id              Delete rating
 ```
 
 ### Documentation
@@ -152,12 +140,10 @@ GET    /health              Health check
 
 ### Collections
 - `blogs` - Blog posts
-- `comments` - Blog comments
-- `ratings` - Blog ratings/reviews
+- `comments` - Blog comments (with optional ratings)
 
 ### Indexes
 - `comments`: Compound index on (blogId, createdAt)
-- `ratings`: Compound index on (blogId, createdAt)
 
 ## Environment Variables
 

@@ -9,19 +9,15 @@ The frontend is now fully integrated with the Express.js backend API. All blog d
 ### Blogs
 - `GET /api/blogs` - Fetch all blog posts
 - `GET /api/blogs/:id` - Fetch a single blog post by ID
-- `POST /api/blogs` - Create a new blog post
-- `PUT /api/blogs/:id` - Update a blog post
-- `DELETE /api/blogs/:id` - Delete a blog post
+- `POST /api/blogs` - Create a new blog post (available but not used in current UI)
+- `PUT /api/blogs/:id` - Update a blog post (available but not used in current UI)
+- `DELETE /api/blogs/:id` - Delete a blog post (available but not used in current UI)
 
-### Comments
+### Comments (with integrated ratings)
 - `GET /api/comments/blog/:blogId` - Fetch all comments for a blog
-- `POST /api/comments/blog/:blogId` - Create a comment
-- `DELETE /api/comments/:id` - Delete a comment
-
-### Ratings
-- `GET /api/ratings/blog/:blogId` - Fetch all ratings for a blog (includes average)
-- `POST /api/ratings/blog/:blogId` - Create a rating/review
-- `DELETE /api/ratings/:id` - Delete a rating
+- `POST /api/comments/blog/:blogId` - Create a comment (with optional rating)
+- `PUT /api/comments/:id` - Update a comment (available but not used in current UI)
+- `DELETE /api/comments/:id` - Delete a comment (available but not used in current UI)
 
 ## Configuration
 
@@ -56,7 +52,7 @@ The backend runs on `http://localhost:5100` by default.
 
 ### Client-Side Data Fetching
 
-1. **Comments & Ratings**: Fetched client-side when the blog post page loads
+1. **Comments with Ratings**: Fetched client-side when the blog post page loads
 2. **Real-time Updates**: Comments and ratings are always fresh
 3. **Loading States**: Skeleton screens shown while fetching
 
@@ -65,20 +61,33 @@ The backend runs on `http://localhost:5100` by default.
 ### Type Updates
 
 ```typescript
-// Old (mock data)
-interface Blog {
-  id: string;
-  slug: string;
-  // ...
-}
-
-// New (API data)
+// API data structure
 interface Blog {
   _id: string;  // MongoDB ObjectId
-  // No slug field - generated from title
+  title: string;
+  excerpt: string;
+  body: string;
+  image: string;
+  author: {
+    name: string;
+    avatar?: string;
+  };
+  category: string;
+  date: string;
   createdAt: string;
   updatedAt: string;
-  // ...
+}
+
+interface Comment {
+  _id: string;
+  blogId: string;
+  author: string;
+  email: string;
+  comment: string;
+  rating?: number;  // Optional 1-5 star rating
+  date: string;
+  createdAt: string;
+  updatedAt: string;
 }
 ```
 
@@ -95,13 +104,14 @@ function generateSlug(title: string): string {
 }
 ```
 
-### Comments & Ratings Combined
+### Comments with Integrated Ratings
 
-The blog post page combines comments and ratings into a single "Reviews" section:
+The blog post page displays comments that can optionally include star ratings:
 
-- Comments without ratings
-- Ratings with reviews (shown with star ratings)
+- Comments without ratings (text only)
+- Comments with ratings (text + 1-5 stars)
 - Sorted by creation date (newest first)
+- All displayed in a unified interface
 
 ## API Client (`lib/api.ts`)
 
@@ -205,9 +215,8 @@ Visit `http://localhost:3000`
 ### 4. Verify API Calls
 
 Open browser DevTools > Network tab to see API requests:
-- `/api/blogs` - Homepage
-- `/api/comments/blog/:id` - Blog post page
-- `/api/ratings/blog/:id` - Blog post page
+- `/api/blogs` - Homepage and blog post pages
+- `/api/comments/blog/:id` - Blog post page for comments
 
 ## Production Deployment
 
@@ -286,7 +295,7 @@ app.use(cors({
 }
 ```
 
-### Get Comments
+### Get Comments (with integrated ratings)
 
 ```json
 {
@@ -297,29 +306,19 @@ app.use(cors({
       "_id": "507f1f77bcf86cd799439012",
       "blogId": "507f1f77bcf86cd799439011",
       "author": "John Doe",
-      "comment": "Great article!",
+      "email": "john@example.com",
+      "comment": "Great article! Really helped me understand proper form.",
+      "rating": 5,
       "date": "2024-01-16T00:00:00.000Z",
       "createdAt": "2024-01-16T10:30:00.000Z",
       "updatedAt": "2024-01-16T10:30:00.000Z"
-    }
-  ]
-}
-```
-
-### Get Ratings
-
-```json
-{
-  "success": true,
-  "count": 3,
-  "averageRating": 4.7,
-  "data": [
+    },
     {
       "_id": "507f1f77bcf86cd799439013",
       "blogId": "507f1f77bcf86cd799439011",
       "author": "Jane Smith",
-      "rating": 5,
-      "review": "Excellent content!",
+      "email": "jane@example.com",
+      "comment": "Very helpful information! Thanks for sharing.",
       "date": "2024-01-17T00:00:00.000Z",
       "createdAt": "2024-01-17T10:30:00.000Z",
       "updatedAt": "2024-01-17T10:30:00.000Z"
@@ -330,11 +329,13 @@ app.use(cors({
 
 ## Next Steps
 
-- [ ] Add comment submission form
-- [ ] Add rating submission form
+- [ ] Add comment submission form with rating option
+- [ ] Add comment editing functionality
+- [ ] Add comment deletion functionality
 - [ ] Implement optimistic UI updates
 - [ ] Add loading states for mutations
 - [ ] Implement error boundaries
 - [ ] Add retry logic for failed requests
 - [ ] Implement caching strategy
-- [ ] Add pagination for comments/ratings
+- [ ] Add pagination for comments
+- [ ] Calculate and display average ratings from comments
