@@ -67,13 +67,19 @@ export const blogSchema = Joi.object({
   query: Joi.object().optional(),
 });
 
-// Comment validation schema (now includes optional rating)
+// Comment validation schema (now includes email and optional rating)
 export const commentSchema = Joi.object({
   body: Joi.object({
     author: Joi.string().trim().max(100).required().messages({
       'string.empty': 'Author is required',
       'string.max': 'Author name cannot exceed 100 characters',
       'any.required': 'Author is required',
+    }),
+    email: Joi.string().trim().email().max(255).required().messages({
+      'string.empty': 'Email is required',
+      'string.email': 'Please enter a valid email',
+      'string.max': 'Email cannot exceed 255 characters',
+      'any.required': 'Email is required',
     }),
     comment: Joi.string().trim().max(1000).required().messages({
       'string.empty': 'Comment is required',
@@ -87,6 +93,30 @@ export const commentSchema = Joi.object({
     }),
   }).required(),
   params: Joi.object().optional(),
+  query: Joi.object().optional(),
+});
+
+// Comment update validation schema (only comment and rating)
+export const commentUpdateSchema = Joi.object({
+  body: Joi.object({
+    comment: Joi.string().trim().max(1000).required().messages({
+      'string.empty': 'Comment is required',
+      'string.max': 'Comment cannot exceed 1000 characters',
+      'any.required': 'Comment is required',
+    }),
+    rating: Joi.number().integer().min(1).max(5).optional().messages({
+      'number.base': 'Rating must be a number',
+      'number.min': 'Rating must be between 1 and 5',
+      'number.max': 'Rating must be between 1 and 5',
+    }),
+  }).required(),
+  params: Joi.object({
+    id: Joi.string().hex().length(24).required().messages({
+      'string.hex': 'Invalid ID format',
+      'string.length': 'Invalid ID format',
+      'any.required': 'ID is required',
+    }),
+  }).required(),
   query: Joi.object().optional(),
 });
 
@@ -116,13 +146,19 @@ export const blogIdSchema = Joi.object({
   query: Joi.object().optional(),
 });
 
-// Combined validation for routes with both blogId param and comment body (now includes optional rating)
+// Combined validation for routes with both blogId param and comment body (now includes email and optional rating)
 export const blogIdWithCommentSchema = Joi.object({
   body: Joi.object({
     author: Joi.string().trim().max(100).required().messages({
       'string.empty': 'Author is required',
       'string.max': 'Author name cannot exceed 100 characters',
       'any.required': 'Author is required',
+    }),
+    email: Joi.string().trim().email().max(255).required().messages({
+      'string.empty': 'Email is required',
+      'string.email': 'Please enter a valid email',
+      'string.max': 'Email cannot exceed 255 characters',
+      'any.required': 'Email is required',
     }),
     comment: Joi.string().trim().max(1000).required().messages({
       'string.empty': 'Comment is required',

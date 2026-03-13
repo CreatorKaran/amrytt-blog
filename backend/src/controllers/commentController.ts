@@ -8,7 +8,7 @@ export const createComment = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { author, comment, rating } = req.body;
+    const { author, email, comment, rating } = req.body;
     const blogId = req.params.blogId;
 
     const blog = await Blog.findById(blogId);
@@ -23,6 +23,7 @@ export const createComment = async (
     const newComment = await Comment.create({
       blogId,
       author,
+      email,
       comment,
       rating: rating || null,
     });
@@ -84,13 +85,12 @@ export const updateComment = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { author, comment, rating } = req.body;
+    const { comment, rating } = req.body;
     const commentId = req.params.id;
 
     const updatedComment = await Comment.findByIdAndUpdate(
       commentId,
       {
-        author,
         comment,
         rating: rating || null,
       },

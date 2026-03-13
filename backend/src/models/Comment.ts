@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IComment extends Document {
   blogId: mongoose.Types.ObjectId;
   author: string;
+  email: string;
   comment: string;
   rating?: number;
   date: Date;
@@ -22,6 +23,14 @@ const CommentSchema: Schema = new Schema(
       required: [true, 'Author name is required'],
       trim: true,
       maxlength: [100, 'Author name cannot exceed 100 characters'],
+    },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      trim: true,
+      lowercase: true,
+      maxlength: [255, 'Email cannot exceed 255 characters'],
+      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email'],
     },
     comment: {
       type: String,

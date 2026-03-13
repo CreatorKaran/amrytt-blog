@@ -5,7 +5,7 @@ import {
   updateComment,
   deleteComment,
 } from '../controllers/commentController';
-import { validate, blogIdWithCommentSchema, blogIdSchema, idSchema } from '../middleware/validation';
+import { validate, blogIdWithCommentSchema, blogIdSchema, commentUpdateSchema } from '../middleware/validation';
 
 const router = Router();
 
@@ -18,6 +18,7 @@ const router = Router();
  *       required:
  *         - blogId
  *         - author
+ *         - email
  *         - comment
  *       properties:
  *         _id:
@@ -28,6 +29,10 @@ const router = Router();
  *         author:
  *           type: string
  *           maxLength: 100
+ *         email:
+ *           type: string
+ *           format: email
+ *           maxLength: 255
  *         comment:
  *           type: string
  *           maxLength: 1000
@@ -49,6 +54,7 @@ const router = Router();
  *         _id: 507f1f77bcf86cd799439012
  *         blogId: 507f1f77bcf86cd799439011
  *         author: John Doe
+ *         email: john.doe@example.com
  *         comment: Great article!
  *         rating: 5
  *         date: 2024-01-15T10:30:00.000Z
@@ -162,7 +168,7 @@ router.get('/blog/:blogId', validate(blogIdSchema), getCommentsByBlogId);
  *       404:
  *         description: Comment not found
  */
-router.put('/:id', validate(blogIdWithCommentSchema), updateComment);
+router.put('/:id', validate(commentUpdateSchema), updateComment);
 
 /**
  * @swagger
