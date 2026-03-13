@@ -3,6 +3,14 @@
 @import "tailwindcss";
 @import "highlight.js/styles/github.css";
 
+:root {
+  --font-lato: 'Lato', sans-serif !important;
+}
+
+body {
+  font-family: var(--font-lato), sans-serif !important;
+}
+
 /* Skeleton animation for loading states */
 @keyframes pulse {
   0%, 100% {
